@@ -6,20 +6,20 @@ use CodeIgniter\Model;
 
 class ExpenseModel extends Model
 {
-    protected $table            = 'expenses'; // Nama tabel di database Anda
+    protected $table            = 'expenses'; 
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'object';
-    protected $useSoftDeletes   = false; // Set true jika Anda menggunakan soft delete
+    protected $useSoftDeletes   = false; 
 
     protected $allowedFields    = ['tanggal', 'kategori', 'deskripsi', 'jumlah'];
 
     // Dates
-    protected $useTimestamps = true; // Otomatis mengisi created_at dan updated_at
+    protected $useTimestamps = true; 
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
-    // protected $deletedField  = 'deleted_at'; // Aktifkan jika menggunakan soft delete
+    
 
     // Validation
     protected $validationRules      = [

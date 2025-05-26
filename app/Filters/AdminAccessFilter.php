@@ -21,8 +21,7 @@ class AdminAccessFilter implements FilterInterface
         $role = $session->get('role');
         // Izinkan akses jika role adalah 'admin' ATAU 'pemilik'
         if ($role !== 'admin' && $role !== 'pemilik') {
-            // Jika bukan admin atau pemilik, redirect atau tampilkan error
-            // Anda bisa mengarahkan ke dashboard umum jika ada, atau halaman utama
+            
             return redirect()->to(base_url('/'))->with('error', 'Anda tidak memiliki hak akses ke area ini.');
         }
 

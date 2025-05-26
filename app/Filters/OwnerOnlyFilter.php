@@ -20,8 +20,7 @@ class OwnerOnlyFilter implements FilterInterface
 
         // Izinkan akses HANYA jika role adalah 'pemilik'
         if ($session->get('role') !== 'pemilik') {
-            // Jika bukan pemilik, redirect atau tampilkan error
-            // Anda bisa mengarahkan ke dashboard admin (jika admin mencoba) atau halaman utama
+            
             return redirect()->to(base_url('admin/dashboard'))->with('error', 'Hanya Pemilik yang dapat mengakses halaman ini.');
         }
 
