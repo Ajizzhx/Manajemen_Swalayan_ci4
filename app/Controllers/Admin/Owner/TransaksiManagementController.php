@@ -52,8 +52,7 @@ class TransaksiManagementController extends BaseController
             return redirect()->to(site_url('admin/owner-area/transaksi-approval'))->with('error', 'Aksi tidak valid.');
         }
 
-        $pemilik_id = $this->session->get('karyawan_id'); // Pastikan ini ID pemilik
-
+        $pemilik_id = $this->session->get('karyawan_id'); 
         $transaksi = $this->transaksiModel->where('transaksi_id', $transaksi_id)
                                           ->where('status_penghapusan', 'pending_approval')
                                           ->first();
@@ -86,7 +85,7 @@ class TransaksiManagementController extends BaseController
         $pemilik_id = $this->session->get('karyawan_id');
 
         $transaksi = $this->transaksiModel->where('transaksi_id', $transaksi_id)
-                                          ->where('status_penghapusan', 'pending_approval') // Hanya bisa reject yang masih pending
+                                          ->where('status_penghapusan', 'pending_approval') 
                                           ->first();
 
         if (!$transaksi) {
@@ -111,7 +110,7 @@ class TransaksiManagementController extends BaseController
                     log_message('info', '[RejectDeletionOwner] Stok produk ID ' . $item->produk_id . ' dikurangi kembali sebanyak ' . $item->jumlah);
                 } else {
                     log_message('warning', '[RejectDeletionOwner] Stok produk ID ' . $item->produk_id . ' tidak mencukupi untuk dikurangi saat reject. Stok saat ini: ' . ($produk->stok ?? 'N/A'));
-                    // Handle error ini, mungkin dengan pesan atau biarkan (tergantung kebijakan bisnis)
+                    
                 }
             }
 
@@ -121,9 +120,7 @@ class TransaksiManagementController extends BaseController
                 'alasan_pembatalan'          => null, // Hapus alasan pembatalan sebelumnya
                 'dibatalkan_oleh_karyawan_id'=> null, // Hapus ID karyawan yang request
                 'tanggal_dibatalkan'         => null, // Hapus tanggal request
-                // Jika Anda punya kolom terpisah untuk approval, set juga ke null
-                // 'penghapusan_disetujui_oleh' => null, 
-                // 'tanggal_approval_hapus'     => null, 
+                
             ];
             $this->transaksiModel->update($transaksi_id, $updateData);
 
@@ -160,12 +157,9 @@ class TransaksiManagementController extends BaseController
             return redirect()->to(site_url('admin/owner-area/transaksi-approval'));
         }
 
-        // Soft delete transaksi utama
-        // Stok sudah dikembalikan saat kasir request, jadi tidak perlu diubah lagi di sini.
-        // Detail transaksi juga bisa di-soft delete jika diperlukan.
+       
         if ($this->transaksiModel->update($transaksi_id, ['is_deleted' => 1, 'status_penghapusan' => 'deleted_by_owner'])) {
-            // Opsional: soft delete juga detail_transaksi jika diperlukan
-            // $this->detailTransaksiModel->where('transaksi_id', $transaksi_id)->set(['is_deleted' => 1])->update();
+            
             session()->setFlashdata('message', 'Transaksi #' . esc($transaksi_id) . ' berhasil dihapus secara permanen (soft delete).');
         } else {
             session()->setFlashdata('error', 'Gagal menghapus transaksi secara permanen.');

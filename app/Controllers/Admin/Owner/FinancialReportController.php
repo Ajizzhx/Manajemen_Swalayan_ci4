@@ -13,7 +13,7 @@ class FinancialReportController extends BaseController
     protected $transaksiModel;
     protected $db;
     protected $session;
-    protected $expenseModel; // Tambahkan ini
+    protected $expenseModel; 
 
     public function __construct()
     {
@@ -30,13 +30,12 @@ class FinancialReportController extends BaseController
         $startDate = $this->request->getGet('start_date') ?? date('Y-m-01');
         $endDate = $this->request->getGet('end_date') ?? date('Y-m-t');
 
-        // Set default jika tidak ada filter atau filter tidak valid
-        // Default ke bulan berjalan
+        
         if (!$this->isValidDate($startDate)) $startDate = date('Y-m-01');
         if (!$this->isValidDate($endDate)) $endDate = date('Y-m-t');
-        // Pastikan end_date tidak lebih kecil dari start_date
+       
         if (strtotime($endDate) < strtotime($startDate)) {
-            $endDate = $startDate; // Atau set ke akhir bulan dari $startDate
+            $endDate = $startDate;
         }
 
         $data['title'] = 'Laporan Keuangan';
@@ -78,7 +77,7 @@ class FinancialReportController extends BaseController
             'total_pengeluaran' => $totalPengeluaran,
         ];
 
-        // Untuk form tambah pengeluaran, kita akan passing data filter ke partial view
+        
         $data['expense_form_view'] = view('Backend/Admin/Owner/FinancialReport/expense_form', ['filter' => $data['filter'], 'validation' => \Config\Services::validation()] );
 
         return view('Backend/Admin/Owner/FinancialReport/index', $data);
@@ -91,21 +90,20 @@ class FinancialReportController extends BaseController
         }
 
         $validation = \Config\Services::validation();
-        // Ambil rules dari model, atau definisikan di sini jika perlu
+        
         $rules = $this->expenseModel->getValidationRules();
-        // Tambahkan validasi untuk report_start_date dan report_end_date jika diperlukan,
-        // tapi biasanya ini hanya untuk redirect, bukan validasi data expense.
+        
 
         if (!$validation->setRules($rules)->withRequest($this->request)->run()) {
-            // Ambil tanggal filter dari form (hidden input) untuk redirect
+            
             $reportStartDate = $this->request->getPost('report_start_date') ?? date('Y-m-01');
             $reportEndDate = $this->request->getPost('report_end_date') ?? date('Y-m-t');
             $queryParams = http_build_query(['start_date' => $reportStartDate, 'end_date' => $reportEndDate]);
 
             return redirect()->to(site_url('admin/owner-area/financial-reports?' . $queryParams))
                 ->withInput()
-                ->with('error_expense', $validation->getErrors()) // Kirim error validasi khusus expense
-                ->with('show_expense_form_error', true); // Flag untuk menampilkan form dengan error
+                ->with('error_expense', $validation->getErrors()) 
+                ->with('show_expense_form_error', true); 
         }
 
         $dataToSave = [
@@ -150,8 +148,7 @@ class FinancialReportController extends BaseController
             session()->setFlashdata('error', 'Gagal menghapus pengeluaran.');
         }
 
-        // Redirect kembali ke halaman laporan dengan filter tanggal yang sama jika ada
-        // Ambil dari session atau parameter sebelumnya jika memungkinkan, atau default
+        
         $startDate = $this->request->getGet('start_date') ?? session()->getFlashdata('report_start_date') ?? date('Y-m-01');
         $endDate = $this->request->getGet('end_date') ?? session()->getFlashdata('report_end_date') ?? date('Y-m-t');
 
