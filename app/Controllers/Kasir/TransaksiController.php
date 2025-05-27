@@ -165,9 +165,22 @@ class TransaksiController extends BaseController
 
        
         $rules = [
-            'nama_pelanggan'    => 'required|min_length[3]|max_length[100]',
-            'email_pelanggan'   => 'permit_empty|valid_email|max_length[100]|is_unique[pelanggan.email,pelanggan_id,{id}]', 
-            'telepon_pelanggan' => 'permit_empty|max_length[20]|is_unique[pelanggan.telepon,pelanggan_id,{id}]', 
+            'nama_pelanggan'    => [
+                'rules'  => 'required|min_length[3]|max_length[100]',
+                'errors' => [
+                    'required'   => 'Nama pelanggan wajib diisi.',
+                    'min_length' => 'Nama pelanggan minimal 3 karakter.',
+                    'max_length' => 'Nama pelanggan maksimal 100 karakter.'
+                ]
+            ],
+            'email_pelanggan'   => [
+                'rules'  => 'permit_empty|valid_email|max_length[100]|is_unique[pelanggan.email]',
+                'errors' => ['valid_email' => 'Format email pelanggan tidak valid.']
+            ],
+            'telepon_pelanggan' => [
+                'rules'  => 'permit_empty|numeric|max_length[20]|is_unique[pelanggan.telepon]',
+                'errors' => ['numeric' => 'Nomor telepon pelanggan hanya boleh berisi angka.']
+            ],
             'alamat_pelanggan'  => 'permit_empty|max_length[255]',
         ];
 

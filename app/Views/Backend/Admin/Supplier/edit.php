@@ -46,7 +46,7 @@
                     </div>
                     <div class="form-group">
                         <label for="telepon">Telepon</label>
-                        <input type="text" class="form-control" id="telepon" name="telepon" value="<?= old('telepon', $supplier->telepon) ?>">
+                        <input type="tel" class="form-control" id="telepon" name="telepon" value="<?= old('telepon', $supplier->telepon) ?>" pattern="[0-9]*" title="Masukkan hanya angka untuk nomor telepon.">
                     </div>
                     <button type="submit" class="btn btn-primary">Update</button>
                     <a href="<?= site_url('/admin/supplier') ?>" class="btn btn-default">Batal</a>

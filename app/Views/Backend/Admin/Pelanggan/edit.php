@@ -48,7 +48,7 @@
                     </div>
                     <div class="form-group">
                         <label for="telepon">Telepon (Opsional)</label>
-                        <input type="text" class="form-control" id="telepon" name="telepon" value="<?= old('telepon', $pelanggan->telepon) ?>">
+                        <input type="tel" class="form-control" id="telepon" name="telepon" value="<?= old('telepon', $pelanggan->telepon) ?>" pattern="[0-9]*" title="Masukkan hanya angka untuk nomor telepon.">
                     </div>
                     <div class="form-group">
                         <label for="alamat">Alamat (Opsional)</label>
