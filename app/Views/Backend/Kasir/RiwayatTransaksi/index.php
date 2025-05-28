@@ -120,11 +120,24 @@
                                     <a href="<?= site_url('kasir/transaksi/detail/' . $transaksi['transaksi_id']) ?>" class="btn btn-info btn-xs">
                                         <span class="glyphicon glyphicon-eye-open"></span> Detail
                                     </a>
-                                    <?php if (empty($transaksi['status_penghapusan']) || $transaksi['status_penghapusan'] === 'rejected'): ?>
+
+                                    <?php if ($transaksi['status_penghapusan'] === 'pending_approval'): ?>
+                                        <span class="label label-warning" style="margin-left: 5px;">Menunggu Persetujuan</span>
+                                    <?php elseif ($transaksi['status_penghapusan'] === 'rejected'): ?>
+                                        <span class="label label-danger" style="margin-left: 5px; margin-right: 5px;">Ditolak</span>
+                                        <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#requestDeleteModal_<?= esc($transaksi['transaksi_id']) ?>">
+                                            Request Ulang
+                                        </button>
+                                    <?php elseif (empty($transaksi['status_penghapusan'])): ?>
                                         <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#requestDeleteModal_<?= esc($transaksi['transaksi_id']) ?>">
                                             Request Hapus
                                         </button>
+                                    <?php endif; ?>
 
+                                    <?php
+                                    // Modal hanya ditampilkan jika ada tombol yang bisa memicunya
+                                    if (empty($transaksi['status_penghapusan']) || $transaksi['status_penghapusan'] === 'rejected'):
+                                    ?>
                                         <!-- Modal Request Delete -->
                                         <div class="modal fade" id="requestDeleteModal_<?= esc($transaksi['transaksi_id']) ?>" tabindex="-1" role="dialog" aria-labelledby="requestDeleteModalLabel_<?= esc($transaksi['transaksi_id']) ?>">
                                             <div class="modal-dialog" role="document">
@@ -133,12 +146,30 @@
                                                         <?= csrf_field() ?>
                                                         <div class="modal-header">
                                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                                            <h4 class="modal-title" id="requestDeleteModalLabel_<?= esc($transaksi['transaksi_id']) ?>">Request Hapus Transaksi #<?= esc($transaksi['transaksi_id']) ?></h4>
+                                                            <h4 class="modal-title" id="requestDeleteModalLabel_<?= esc($transaksi['transaksi_id']) ?>">
+                                                                <?php if ($transaksi['status_penghapusan'] === 'rejected'): ?>
+                                                                    Request Ulang Penghapusan Transaksi #<?= esc($transaksi['transaksi_id']) ?>
+                                                                <?php else: ?>
+                                                                    Request Hapus Transaksi #<?= esc($transaksi['transaksi_id']) ?>
+                                                                <?php endif; ?>
+                                                            </h4>
                                                         </div>
                                                         <div class="modal-body">
                                                             <p>Anda akan meminta penghapusan untuk transaksi ini. Stok produk yang terkait akan dikembalikan. Penghapusan permanen memerlukan persetujuan Pemilik.</p>
+                                                            <?php if ($transaksi['status_penghapusan'] === 'rejected' && !empty($transaksi['alasan_penolakan_owner'])): ?>
+                                                                <div class="alert alert-warning">
+                                                                    <strong>Alasan Penolakan Sebelumnya oleh Pemilik:</strong><br>
+                                                                    <?= nl2br(esc($transaksi['alasan_penolakan_owner'])) ?>
+                                                                </div>
+                                                            <?php endif; ?>
                                                             <div class="form-group">
-                                                                <label for="alasan_penghapusan_<?= esc($transaksi['transaksi_id']) ?>">Alasan Penghapusan (Wajib)</label>
+                                                                <label for="alasan_penghapusan_<?= esc($transaksi['transaksi_id']) ?>">
+                                                                    <?php if ($transaksi['status_penghapusan'] === 'rejected'): ?>
+                                                                        Alasan Permintaan Ulang Penghapusan (Wajib)
+                                                                    <?php else: ?>
+                                                                        Alasan Penghapusan (Wajib)
+                                                                    <?php endif; ?>
+                                                                </label>
                                                                 <textarea name="alasan_penghapusan" id="alasan_penghapusan_<?= esc($transaksi['transaksi_id']) ?>" class="form-control" rows="3" required></textarea>
                                                             </div>
                                                         </div>
@@ -150,8 +181,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    <?php elseif ($transaksi['status_penghapusan'] === 'pending_approval'): ?>
-                                        <span class="label label-warning">Menunggu Persetujuan</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>

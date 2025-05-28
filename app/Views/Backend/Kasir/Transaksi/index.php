@@ -72,6 +72,7 @@
                     </div>
                     <div id="selected_pelanggan_info" style="margin-bottom: 10px; display:none;" class="well well-sm">
                         <strong>Member:</strong> <span id="pelanggan_nama_display"></span>
+                        <strong>Poin Saat Ini:</strong> <span id="pelanggan_poin_display">0</span>
                         <button type="button" class="btn btn-xs btn-warning pull-right" id="clear_pelanggan_btn">Ganti</button>
                     </div>
                     <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#modalTambahPelanggan">
@@ -154,15 +155,15 @@
                             <input type="text" class="form-control" id="nama_pelanggan" name="nama_pelanggan" required>
                         </div>
                         <div class="form-group">
-                            <label for="email_pelanggan">Email (Opsional)</label>
+                            <label for="email_pelanggan">Email</label>
                             <input type="email" class="form-control" id="email_pelanggan" name="email_pelanggan">
                         </div>
                         <div class="form-group">
-                            <label for="telepon_pelanggan">Telepon (Opsional)</label>
+                            <label for="telepon_pelanggan">Telepon</label>
                             <input type="text" class="form-control" id="telepon_pelanggan" name="telepon_pelanggan">
                         </div>
                         <div class="form-group">
-                            <label for="alamat_pelanggan">Alamat (Opsional)</label>
+                            <label for="alamat_pelanggan">Alamat</label>
                             <textarea class="form-control" id="alamat_pelanggan" name="alamat_pelanggan" rows="2"></textarea>
                         </div>
                     </div>
@@ -202,6 +203,10 @@
                                 <tr>
                                     <td class="text-right"><strong>Kasir:</strong></td>
                                     <td><span id="detail_nama_kasir_modal"></span></td>
+                                </tr>
+                                <tr id="detail_poin_diperoleh_modal_row" style="display:none;">
+                                    <td class="text-right"><strong>Poin Diperoleh:</strong></td>
+                                    <td><strong id="detail_poin_diperoleh_modal" class="text-success"></strong></td>
                                 </tr>
                                 <tr id="detail_subtotal_modal_row" style="display:none;">
                                     <td class="text-right"><strong>Subtotal:</strong></td>
@@ -297,6 +302,7 @@ $(document).ready(function() {
     let csrfName = '<?= csrf_token() ?>'; // CSRF Token Name
     let lastSuccessfulTransactionDetails = null; 
     let csrfHash = '<?= csrf_hash() ?>'; // CSRF Hash
+    let currentPelangganPoin = 0; 
     let selectedPelangganNameForStruk = null; 
     let selectedPelangganDiskonPersen = 0; 
     
@@ -469,9 +475,11 @@ $(document).ready(function() {
                 console.warn("Peringatan: 'diskon_persen' tidak ditemukan pada data pelanggan yang dipilih dari autocomplete. Default ke 0.", ui.item);
             }
             $("#selected_pelanggan_id").val(ui.item.id);
-            selectedPelangganNameForStruk = ui.item.nama; 
-            $("#pelanggan_nama_display").text(ui.item.nama + (ui.item.telepon ? ' ('+ui.item.telepon+')' : ''));
+            selectedPelangganNameForStruk = ui.item.nama;
+            $("#pelanggan_nama_display").text(ui.item.nama); // Hanya tampilkan nama
             selectedPelangganDiskonPersen = parseFloat(ui.item.diskon_persen) || 0; 
+            currentPelangganPoin = parseInt(ui.item.poin) || 0; 
+            $("#pelanggan_poin_display").text(currentPelangganPoin);
             $("#selected_pelanggan_info").show();
             $("#search_pelanggan").hide().val('');
             return false;
@@ -483,6 +491,8 @@ $(document).ready(function() {
         $("#selected_pelanggan_info").hide();
         selectedPelangganDiskonPersen = 0; 
         renderCart(); 
+        currentPelangganPoin = 0; 
+        $("#pelanggan_poin_display").text(currentPelangganPoin);
         selectedPelangganNameForStruk = null; 
         $("#search_pelanggan").show().focus();
     });
@@ -510,8 +520,10 @@ $(document).ready(function() {
                         }
                         $("#selected_pelanggan_id").val(response.pelanggan.pelanggan_id); 
                         selectedPelangganDiskonPersen = parseFloat(response.pelanggan.diskon_persen) || 0; 
-                        selectedPelangganNameForStruk = response.pelanggan.nama; 
-                        $("#pelanggan_nama_display").text(response.pelanggan.nama + (response.pelanggan.telepon ? ' ('+response.pelanggan.telepon+')' : ''));
+                        selectedPelangganNameForStruk = response.pelanggan.nama;
+                        $("#pelanggan_nama_display").text(response.pelanggan.nama); // Hanya tampilkan nama
+                        currentPelangganPoin = parseInt(response.pelanggan.poin) || 0; 
+                        $("#pelanggan_poin_display").text(currentPelangganPoin);
                         $("#selected_pelanggan_info").show();
                         renderCart(); 
                         $("#search_pelanggan").hide().val('');
@@ -949,6 +961,13 @@ $(document).ready(function() {
                     $('#detail_total_belanja_modal').text(formatCurrency(transactionData.total_harga));
 
                     $('#detail_uang_bayar_modal').text(formatCurrency(transactionData.uang_bayar));
+                    // Tampilkan poin diperoleh di modal
+                    if (response.poin_diperoleh && response.poin_diperoleh > 0) {
+                        $('#detail_poin_diperoleh_modal').text(response.poin_diperoleh + ' Poin');
+                        $('#detail_poin_diperoleh_modal_row').show();
+                    } else {
+                        $('#detail_poin_diperoleh_modal_row').hide();
+                    }
                     $('#detail_kembalian_modal').text(formatCurrency(response.kembalian));
 
                     // Simpan semua detail transaksi yang berhasil untuk struk
@@ -964,7 +983,9 @@ $(document).ready(function() {
                         diskon_persen_pelanggan: selectedPelangganDiskonPersen, 
                         total_harga_neto_numeric: transactionData.total_harga, 
                         uang_bayar_numeric: transactionData.uang_bayar,
-                        kembalian_numeric: response.kembalian
+                        kembalian_numeric: response.kembalian,
+                        poin_diperoleh_transaksi: response.poin_diperoleh || 0, 
+                        total_poin_pelanggan_setelah_transaksi: (currentPelangganPoin + (response.poin_diperoleh || 0)) 
                     };
                     console.log("Data untuk struk disimpan:", lastSuccessfulTransactionDetails);
 
@@ -1063,6 +1084,8 @@ $(document).ready(function() {
         $('#uang_bayar_display').val(''); // Kosongkan juga field display
         $('#uang_bayar').val('');
         $('#metode_pembayaran').val('tunai'); 
+        currentPelangganPoin = 0; 
+        $("#pelanggan_poin_display").text(currentPelangganPoin);
         selectedPelangganDiskonPersen = 0; 
         renderCart(); 
         $('#btn_proses_pembayaran').prop('disabled', true);
@@ -1122,6 +1145,10 @@ $(document).ready(function() {
         strukContent += `Total Bayar   : ${formatCurrencySimple(strukData.total_harga_neto_numeric).padStart(25)}\n`;
         strukContent += `Uang Bayar    : ${formatCurrencySimple(strukData.uang_bayar_numeric).padStart(25)}\n`;
         strukContent += `Kembalian     : ${formatCurrencySimple(strukData.kembalian_numeric).padStart(25)}\n`;
+        if (strukData.poin_diperoleh_transaksi > 0) {
+            strukContent += `Poin Diperoleh: ${strukData.poin_diperoleh_transaksi.toString().padStart(25)}\n`;
+            strukContent += `Total Poin    : ${strukData.total_poin_pelanggan_setelah_transaksi.toString().padStart(25)}\n`;
+        }
         strukContent += `============================================\n`;
         strukContent += `         TERIMA KASIH TELAH BERBELANJA        \n`;
         strukContent += `            www.dolog-sihite-3.com           \n`; 

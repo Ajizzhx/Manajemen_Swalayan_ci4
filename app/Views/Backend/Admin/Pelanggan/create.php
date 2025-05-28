@@ -44,21 +44,25 @@
                         <input type="text" class="form-control" id="nama" name="nama" value="<?= old('nama') ?>" required>
                     </div>
                     <div class="form-group">
-                        <label for="email">Email (Opsional)</label>
-                        <input type="email" class="form-control" id="email" name="email" value="<?= old('email') ?>">
+                    <label for="email">Email <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" id="email" name="email" value="<?= old('email') ?>" required>
                     </div>
                     <div class="form-group">
-                        <label for="telepon">Telepon (Opsional)</label>
+                        <label for="telepon">Telepon</label>
                         <input type="tel" class="form-control" id="telepon" name="telepon" value="<?= old('telepon') ?>" pattern="[0-9]*" title="Masukkan hanya angka untuk nomor telepon.">
                     </div>
                     <div class="form-group">
-                        <label for="alamat">Alamat (Opsional)</label>
+                        <label for="alamat">Alamat</label>
                         <textarea class="form-control" id="alamat" name="alamat" rows="3"><?= old('alamat') ?></textarea>
                     </div>
                      <div class="form-group">
                         <label for="diskon_persen">Diskon (%)</label>
                         <input type="number" class="form-control" id="diskon_persen" name="diskon_persen" value="<?= old('diskon_persen', '1.00') ?>" step="0.01" min="0" max="100">
                     </div>
+                <div class="form-group">
+                    <label for="poin">Poin Awal</label>
+                    <input type="number" class="form-control" id="poin" name="poin" value="<?= old('poin', '0') ?>" step="1" min="0">
+                </div>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                     <a href="<?= site_url('/admin/pelanggan') ?>" class="btn btn-default">Batal</a>
                 <?= form_close() ?>

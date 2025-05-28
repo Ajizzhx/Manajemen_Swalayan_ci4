@@ -59,8 +59,14 @@
 				<?php endif; ?>
 			<?php elseif ($userRole === 'kasir'): ?>
 				<li class="<?= (uri_string() == 'kasir/dashboard') ? 'active' : '' ?>"><a href="<?= site_url('kasir/dashboard') ?>"><span class="glyphicon glyphicon-dashboard"></span> Dashboard Kasir</a></li>
-				<li class="<?= (uri_string() == 'kasir/transaksi') ? 'active' : '' ?>"><a href="<?= site_url('kasir/transaksi') ?>"><span class="glyphicon glyphicon-shopping-cart"></span> Transaksi Penjualan</a></li>
-				<li class="<?= (uri_string() == 'kasir/riwayat-transaksi' || strpos(uri_string(), 'kasir/transaksi/detail/') !== false) ? 'active' : '' ?>"><a href="<?= site_url('kasir/riwayat-transaksi') ?>"><span class="glyphicon glyphicon-list-alt"></span> Riwayat Transaksi</a></li>
+				<li class="<?= (uri_string() == 'kasir/transaksi' && strpos(uri_string(), 'kasir/transaksi/detail/') === false) ? 'active' : '' ?>"><a href="<?= site_url('kasir/transaksi') ?>"><span class="glyphicon glyphicon-shopping-cart"></span> Transaksi Penjualan</a></li>
+				<li class="<?= (uri_string() == 'kasir/riwayat-transaksi' || strpos(uri_string(), 'kasir/transaksi/detail/') !== false) ? 'active' : '' ?>">
+					<a href="<?= site_url('kasir/riwayat-transaksi') ?>"><span class="glyphicon glyphicon-list-alt"></span> Riwayat Transaksi
+						<?php if (isset($kasir_rejected_request_count) && $kasir_rejected_request_count > 0): ?>
+							<span style="display: inline-block; width: 8px; height: 8px; background-color: red; border-radius: 50%; margin-left: 7px; vertical-align: middle;"></span>
+						<?php endif; ?>
+					</a>
+				</li>
 				<li class="<?= (uri_string() == 'kasir/cek-produk') ? 'active' : '' ?>">
 					<a href="<?= site_url('kasir/cek-produk') ?>"><span class="glyphicon glyphicon-search"></span> Cek Harga & Stok</a>
 				</li>

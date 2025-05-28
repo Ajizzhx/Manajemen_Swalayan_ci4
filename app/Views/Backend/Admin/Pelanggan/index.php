@@ -38,6 +38,7 @@
                             <th data-field="email" data-sortable="true">Email</th>
                             <th data-field="telepon" data-sortable="true">Telepon</th>
                             <th data-field="alamat" data-sortable="true">Alamat</th>
+                        <th data-field="poin" data-sortable="true">Poin</th>
                             <th data-field="actions">Aksi</th>
                         </tr>
                         </thead>
@@ -49,6 +50,7 @@
                                 <td><?= esc($p->email ?: '-') ?></td>
                                 <td><?= esc($p->telepon ?: '-') ?></td>
                                 <td><?= esc($p->alamat ?: '-') ?></td>
+                            <td><?= esc($p->poin ?? 0) ?></td> 
                                 <td>
                                     <a href="<?= site_url('/admin/pelanggan/edit/' . $p->pelanggan_id) ?>" class="btn btn-warning btn-xs">
                                         <span class="glyphicon glyphicon-edit"></span> Edit

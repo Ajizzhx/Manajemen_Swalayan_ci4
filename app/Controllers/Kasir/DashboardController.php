@@ -37,6 +37,14 @@ class DashboardController extends BaseController
             ->get()->getRow();
         $data['pendapatan_hari_ini'] = $pendapatan->total_pendapatan_hari_ini ?? 0;
 
+        // Hitung transaksi yang permintaan hapusnya ditolak untuk kasir ini
+        $data['kasir_rejected_request_count'] = $this->transaksiModel
+            ->where('karyawan_id', $kasir_id)
+            ->where('status_penghapusan', 'rejected')
+            ->where('is_deleted', 0)
+            ->countAllResults();
+
+
         return view('Backend/Kasir/dashboard', $data);
     }
 

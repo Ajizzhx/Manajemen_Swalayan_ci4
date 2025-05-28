@@ -39,10 +39,20 @@ class TransaksiController extends BaseController
 
     public function index()
     {
+        $kasir_id = $this->session->get('karyawan_id');
+        if (!$kasir_id) {
+            // Handle jika kasir_id tidak ada di session, mungkin redirect ke login
+            session()->setFlashdata('error', 'Sesi Anda tidak valid. Silakan login kembali.');
+            return redirect()->to(site_url('login'));
+        }
+
         $data['title'] = 'Transaksi Penjualan';
        
         $data['cart_items_view'] = $this->session->get('kasir_cart_items') ?? [];
         $data['selected_pelanggan'] = $this->session->get('kasir_selected_pelanggan') ?? null;
+        $data['kasir_rejected_request_count'] = $this->transaksiModel
+            ->where('karyawan_id', $kasir_id)
+            ->where('status_penghapusan', 'rejected')->where('is_deleted', 0)->countAllResults();
         
         
         return view('Backend/Kasir/Transaksi/index', $data);
@@ -133,6 +143,7 @@ class TransaksiController extends BaseController
                         'telepon' => $p->telepon,
                         'alamat' => $p->alamat,
                         'diskon_persen' => $p->diskon_persen ?? 0.00, 
+                        'poin' => $p->poin ?? 0, // Tambahkan poin pelanggan
                     ];
                 }
             }
@@ -192,6 +203,7 @@ class TransaksiController extends BaseController
                 'email'         => trim((string)($postData['email_pelanggan'] ?? '')),
                 'telepon'       => trim((string)($postData['telepon_pelanggan'] ?? '')),
                 'alamat'        => trim((string)($postData['alamat_pelanggan'] ?? '')),
+                'poin'          => 0, // Poin awal untuk member baru dari POS
                 'diskon_persen' => 1.00, // Default diskon 1% untuk member baru dari POS
                 'is_deleted'    => 0,
             ];
@@ -218,6 +230,7 @@ class TransaksiController extends BaseController
                             'nama' => $newPelanggan->nama,
                             'telepon' => $newPelanggan->telepon,
                             'diskon_persen' => $newPelanggan->diskon_persen ?? 0.00, 
+                            'poin' => $newPelanggan->poin ?? 0, // Sertakan poin
                         ];
                     }
                     return $this->response->setJSON([
@@ -458,16 +471,42 @@ class TransaksiController extends BaseController
             $this->db->transCommit();
             log_message('info', '[TransaksiController::prosesPembayaran] Transaksi BERHASIL di-commit.');
 
+            // Logika Penambahan Poin Member setelah transaksi berhasil
+            $poinDiperolehTransaksiIni = 0;
+            if (!empty($pelangganId)) {
+                $pelangganUntukPoin = $this->pelangganModel->find($pelangganId);
+                if ($pelangganUntukPoin) {
+                    // Aturan: 1 poin untuk setiap Rp 10.000 belanja (dari total harga neto)
+                    $poinDiperolehTransaksiIni = floor($serverTotalHargaNeto / 10000); 
+
+                    if ($poinDiperolehTransaksiIni > 0) {
+                        $poinSaatIni = $pelangganUntukPoin->poin ?? 0;
+                        $poinBaru = $poinSaatIni + $poinDiperolehTransaksiIni;
+
+                        if ($this->pelangganModel->update($pelangganId, ['poin' => $poinBaru])) {
+                            log_message('info', "[ProsesPembayaran] Poin berhasil ditambahkan untuk pelanggan ID: " . $pelangganId . ". Poin diperoleh: " . $poinDiperolehTransaksiIni . ". Total poin baru: " . $poinBaru);
+                            // (Opsional) Catat ke riwayat_poin jika ada modelnya
+                        } else {
+                            log_message('error', "[ProsesPembayaran] Gagal update poin untuk pelanggan ID: " . $pelangganId);
+                            // Pertimbangkan apakah ini harus menjadi error kritis atau hanya log
+                        }
+                    }
+                }
+            }
+
             // Log Audit
             $this->auditLogModel->insert([
                 'user_id' => $kasirId,
                 'action' => 'CREATE_TRANSAKSI',
-                'description' => 'Memproses transaksi baru: ' . $kodeTransaksiGenerated . ' dengan total ' . number_to_currency($serverTotalHargaNeto, 'IDR', 'id_ID', 0),
+                'description' => 'Memproses transaksi baru: ' . $kodeTransaksiGenerated . 
+                                 ' dengan total ' . number_to_currency($serverTotalHargaNeto, 'IDR', 'id_ID', 0) .
+                                 ($poinDiperolehTransaksiIni > 0 ? '. Poin diperoleh: ' . $poinDiperolehTransaksiIni : ''),
             ]);
 
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Transaksi berhasil diproses.',
+                'poin_diperoleh' => $poinDiperolehTransaksiIni, // Kirim poin yang diperoleh
                 'transaksi_id' => $kodeTransaksiGenerated, 
                 'kembalian' => $uangBayar - $serverTotalHargaNeto, 
                 'csrf_hash' => csrf_hash()
@@ -635,6 +674,11 @@ class TransaksiController extends BaseController
         $data['selected_id_transaksi'] = $search_id_transaksi;
         // Ambil daftar metode pembayaran yang pernah digunakan oleh kasir ini
         $data['metode_pembayaran_list'] = $this->transaksiModel->select('metode_pembayaran')->distinct()->where('is_deleted', 0)->where('karyawan_id', $kasir_id)->where('metode_pembayaran IS NOT NULL')->where("metode_pembayaran != ''")->findAll();
+        
+        $data['kasir_rejected_request_count'] = $this->transaksiModel
+            ->where('karyawan_id', $kasir_id)
+            ->where('status_penghapusan', 'rejected')->where('is_deleted', 0)->countAllResults();
+
 
         return view('Backend/Kasir/RiwayatTransaksi/index', $data);
     }
@@ -684,6 +728,10 @@ class TransaksiController extends BaseController
         $data['title'] = 'Detail Transaksi #' . esc($transaksi['transaksi_id']); 
         $data['transaksi'] = $transaksi;
         $data['detail_items'] = $detailItems;
+        $data['kasir_rejected_request_count'] = $this->transaksiModel
+            ->where('karyawan_id', $kasir_id_session) // Menggunakan kasir_id_session yang sudah divalidasi
+            ->where('status_penghapusan', 'rejected')->where('is_deleted', 0)->countAllResults();
+
 
         return view('Backend/Kasir/RiwayatTransaksi/detail', $data);
     }
@@ -747,6 +795,27 @@ public function requestDeleteTransaksi($transaksi_id = null)
                                   ->set('stok', 'stok + ' . (int)$item->jumlah, false) // Menggunakan sintaks objek
                                   ->update();
                 log_message('info', '[RequestDeleteKasir] Stok produk ID ' . $item->produk_id . ' dikembalikan sebanyak ' . $item->jumlah);
+            }
+
+            // Pengurangan Poin jika transaksi melibatkan member dan ada poin yang terkait
+            if (!empty($transaksi->pelanggan_id)) {
+                $pelangganUntukPoin = $this->pelangganModel->find($transaksi->pelanggan_id);
+                if ($pelangganUntukPoin) {
+                    // Hitung ulang poin yang didapat dari transaksi ini
+                    $poinDariTransaksiIni = floor($transaksi->total_harga / 10000); // total_harga adalah harga neto
+
+                    if ($poinDariTransaksiIni > 0) {
+                        $poinSaatIni = $pelangganUntukPoin->poin ?? 0;
+                        $poinBaru = max(0, $poinSaatIni - $poinDariTransaksiIni); // Pastikan poin tidak negatif
+
+                        if ($this->pelangganModel->update($transaksi->pelanggan_id, ['poin' => $poinBaru])) {
+                            log_message('info', '[RequestDeleteKasir] Poin berhasil dikurangi untuk pelanggan ID: ' . $transaksi->pelanggan_id . ". Poin dikurangi: " . $poinDariTransaksiIni . ". Total poin baru: " . $poinBaru);
+                        } else {
+                            log_message('error', "[RequestDeleteKasir] Gagal update (kurangi) poin untuk pelanggan ID: " . $transaksi->pelanggan_id);
+                            // Pertimbangkan apakah ini harus menggagalkan seluruh rollback atau hanya di-log
+                        }
+                    }
+                }
             }
 
             // 2. Update status transaksi

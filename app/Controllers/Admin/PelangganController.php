@@ -18,6 +18,7 @@ class PelangganController extends BaseController
         $this->pelangganModel = new PelangganModel();
         $this->session = \Config\Services::session(); 
         $this->validation = \Config\Services::validation();
+        $this->auditLogModel = new AuditLogModel(); // Inisialisasi AuditLogModel di constructor
         helper(['form', 'url', 'custom']); 
     }
 
@@ -54,13 +55,11 @@ class PelangganController extends BaseController
             'email'         => $this->request->getPost('email'),
             'telepon'       => $this->request->getPost('telepon'),
             'alamat'        => $this->request->getPost('alamat'),
-            // Ambil diskon_persen dari form, jika tidak ada, default ke 1.00
             'diskon_persen' => (float)($this->request->getPost('diskon_persen') ?? 1.00),
+            'poin'          => (int)($this->request->getPost('poin') ?? 0), // Tambahkan poin
             'is_deleted'    => 0, 
         ];
 
-        // Log Audit
-        $this->auditLogModel = new AuditLogModel();
         $this->auditLogModel->insert([
             'user_id' => session()->get('karyawan_id'),
             'action' => 'CREATE_PELANGGAN',
@@ -116,6 +115,7 @@ class PelangganController extends BaseController
             'nama'          => $this->request->getPost('nama'),
             'alamat'        => $this->request->getPost('alamat'),
             'diskon_persen' => (float)($this->request->getPost('diskon_persen') ?? 0.00), 
+            'poin'          => (int)($this->request->getPost('poin') ?? $pelanggan->poin ?? 0), // Tambahkan poin
         ];
 
         
@@ -136,6 +136,7 @@ class PelangganController extends BaseController
         $isDataChanged = ($updateData['nama'] !== $pelanggan->nama) ||
                          ($updateData['alamat'] !== $pelanggan->alamat) ||
                          ($updateData['diskon_persen'] != ($pelanggan->diskon_persen ?? 0.00)) || 
+                         ($updateData['poin'] != ($pelanggan->poin ?? 0)) || // Cek perubahan poin
                          (isset($updateData['email'])) ||
                          (isset($updateData['telepon']));
 
@@ -143,7 +144,6 @@ class PelangganController extends BaseController
             session()->setFlashdata('message', 'Tidak ada perubahan data.');
             return redirect()->to('/admin/pelanggan');
         }
-
         if ($this->pelangganModel->update($id, $updateData)) {
             // Log Audit
             $this->auditLogModel = new AuditLogModel();
@@ -173,8 +173,6 @@ class PelangganController extends BaseController
         
         if ($this->pelangganModel->update($id, ['is_deleted' => 1])) {
         
-            // Log Audit
-            $this->auditLogModel = new AuditLogModel();
             $this->auditLogModel->insert([
                 'user_id' => session()->get('karyawan_id'),
                 'action' => 'DELETE_PELANGGAN',
