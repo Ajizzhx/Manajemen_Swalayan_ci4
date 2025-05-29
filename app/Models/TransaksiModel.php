@@ -25,7 +25,8 @@ class TransaksiModel extends Model
         'dibatalkan_oleh_karyawan_id',
         'alasan_pembatalan',
         'tanggal_dibatalkan',
-        'status_penghapusan'   
+        'status_penghapusan',
+        'alasan_penolakan_owner'
     ];
 
     // Dates

@@ -71,10 +71,10 @@
                                                     <?= csrf_field() ?>
                                                     <button type="submit" class="btn btn-success btn-xs" onclick="return confirm('Anda yakin ingin menyetujui penghapusan transaksi ini?')">Setujui</button>
                                                 </form>
-                                                <form action="<?= site_url('admin/owner-area/transaksi-approval/reject/' . esc($trx['transaksi_id'])) ?>" method="post" style="display: inline-block;">
-                                                    <?= csrf_field() ?>
-                                                    <button type="submit" class="btn btn-warning btn-xs" onclick="return confirm('Anda yakin ingin menolak permintaan penghapusan ini? Stok akan disesuaikan kembali.')">Tolak</button>
-                                                </form>
+                                                <!-- Tombol Tolak yang memicu modal -->
+                                                <button type="button" class="btn btn-warning btn-xs btn-reject-request" data-transaksi-id="<?= esc($trx['transaksi_id']) ?>" data-action-url="<?= site_url('admin/owner-area/transaksi-approval/reject/' . esc($trx['transaksi_id'])) ?>">
+                                                    Tolak
+                                                </button>
                                             <?php elseif ($trx['status_penghapusan'] === 'approved_for_deletion'): ?>
                                                 <form action="<?= site_url('admin/owner-area/transaksi-approval/delete-permanent/' . esc($trx['transaksi_id'])) ?>" method="post" style="display: inline-block;">
                                                     <?= csrf_field() ?>
@@ -116,10 +116,69 @@
     </div>
 </div>
 
+<!-- Modal Alasan Penolakan -->
+<div class="modal fade" id="modalAlasanPenolakan" tabindex="-1" role="dialog" aria-labelledby="modalAlasanPenolakanLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="formRejectRequest" action="" method="POST"> <!-- Action akan diisi oleh JS -->
+                <?= csrf_field() ?>
+                <input type="hidden" name="status" value="rejected"> <!-- Meskipun tidak digunakan di KasirController, ini bisa jadi penanda -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="modalAlasanPenolakanLabel">Alasan Penolakan Transaksi #<span id="modalTransaksiIdDisplayReject"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="alasan_penolakan_owner">Alasan Penolakan <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="alasan_penolakan_owner" name="alasan_penolakan_owner_input" rows="3" required></textarea>
+                        <div class="invalid-feedback" style="color: red; display: none;">
+                            Alasan penolakan wajib diisi, dan poin member tidak akan dikembalikan.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">Tolak Permintaan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 <?= $this->include('Backend/Template/footer') ?>
 <script>
     $(function () {
       $('[data-toggle="tooltip"]').tooltip()
+
+    // Script untuk Modal Penolakan
+    $('.btn-reject-request').on('click', function() {
+        var transaksiId = $(this).data('transaksi-id');
+        var actionUrl = $(this).data('action-url');
+        
+        $('#formRejectRequest').attr('action', actionUrl);
+        $('#modalTransaksiIdDisplayReject').text(transaksiId);
+        $('#alasan_penolakan_owner').val(''); // Kosongkan textarea
+        $('.invalid-feedback').hide(); // Sembunyikan pesan error
+        $('#modalAlasanPenolakan').modal('show');
+    });
+
+    $('#formRejectRequest').on('submit', function(e) {
+        var alasan = $('#alasan_penolakan_owner').val().trim();
+        if (alasan === '') {
+            e.preventDefault(); // Hentikan submit form
+            $('#alasan_penolakan_owner').addClass('is-invalid'); // Jika Anda menggunakan Bootstrap untuk styling error
+            $('.invalid-feedback').show();
+        } else {
+            $('#alasan_penolakan_owner').removeClass('is-invalid');
+            $('.invalid-feedback').hide();
+            // Tambahkan konfirmasi sebelum submit jika diinginkan
+            if(!confirm('Anda yakin ingin menolak permintaan penghapusan transaksi ini? Stok akan disesuaikan kembali.')) {
+                e.preventDefault();
+            }
+        }
+    });
+
     $('.btn-lihat-detail').on('click', function() {
         var transaksiId = $(this).data('transaksiid');
         $('#detailTransaksiModalLabel').text('Detail Item Transaksi #' + transaksiId);

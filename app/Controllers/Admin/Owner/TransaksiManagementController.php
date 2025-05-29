@@ -93,6 +93,18 @@ class TransaksiManagementController extends BaseController
             return redirect()->to(site_url('admin/owner-area/transaksi-approval'));
         }
 
+       
+        log_message('debug', "[RejectDeletionOwner] Mencoba mengambil 'alasan_penolakan_owner_input' dari POST untuk Transaksi ID {$transaksi_id}. Nilai mentah: '" . $this->request->getPost('alasan_penolakan_owner_input') . "'");
+        $alasanPenolakanDariOwner = trim((string)$this->request->getPost('alasan_penolakan_owner_input'));
+        log_message('debug', "[RejectDeletionOwner] Alasan penolakan SETELAH trim untuk Transaksi ID {$transaksi_id}: '" . $alasanPenolakanDariOwner . "'");
+
+        if (empty($alasanPenolakanDariOwner)) {
+            // Jika alasan penolakan wajib diisi oleh pemilik
+            session()->setFlashdata('error', 'Alasan penolakan wajib diisi untuk menolak permintaan.');
+            return redirect()->to(site_url('admin/owner-area/transaksi-approval'))->withInput(); // withInput() akan error jika tidak ada form sebelumnya, sesuaikan
+            
+            log_message('warning', "[RejectDeletionOwner] Alasan penolakan KOSONG setelah trim untuk Transaksi ID {$transaksi_id}. Ini akan disimpan sebagai string kosong atau NULL jika tidak ada validasi wajib isi.");
+        }
         $this->db->transBegin();
         try {
             // 1. Kembalikan (kurangi) stok produk yang sebelumnya ditambah saat request hapus
@@ -107,23 +119,25 @@ class TransaksiManagementController extends BaseController
                     $this->produkModel->where('produk_id', $item->produk_id) // Menggunakan sintaks objek
                                       ->set('stok', 'stok - ' . (int)$item->jumlah, false) // Menggunakan sintaks objek
                                       ->update();
-                    log_message('info', '[RejectDeletionOwner] Stok produk ID ' . $item->produk_id . ' dikurangi kembali sebanyak ' . $item->jumlah);
+                    log_message('info', "[RejectDeletionOwner] Stok produk ID {$item->produk_id} dikurangi kembali sebanyak {$item->jumlah} untuk Transaksi ID: {$transaksi_id}");
                 } else {
-                    log_message('warning', '[RejectDeletionOwner] Stok produk ID ' . $item->produk_id . ' tidak mencukupi untuk dikurangi saat reject. Stok saat ini: ' . ($produk->stok ?? 'N/A'));
+                    log_message('warning', "[RejectDeletionOwner] Stok produk ID {$item->produk_id} tidak mencukupi untuk dikurangi saat reject pada Transaksi ID: {$transaksi_id}. Stok saat ini: " . ($produk->stok ?? 'N/A'));
                     
                 }
             }
 
             // 2. Update status transaksi
             $updateData = [
-                'status_penghapusan'         => null, // Kembalikan ke status normal
-                'alasan_pembatalan'          => null, // Hapus alasan pembatalan sebelumnya
-                'dibatalkan_oleh_karyawan_id'=> null, // Hapus ID karyawan yang request
-                'tanggal_dibatalkan'         => null, // Hapus tanggal request
-                
+                'status_penghapusan'       => 'rejected',
+                'alasan_penolakan_owner'   => $alasanPenolakanDariOwner, 
+           
+                'penghapusan_disetujui_oleh' => null, 
+                'tanggal_approval_hapus'     => null, 
             ];
+            log_message('debug', "[RejectDeletionOwner] Data untuk update transaksi ID {$transaksi_id}: " . json_encode($updateData));
             $this->transaksiModel->update($transaksi_id, $updateData);
 
+           
             if ($this->db->transStatus() === false) {
                 $this->db->transRollback();
                 session()->setFlashdata('error', 'Gagal menolak penghapusan. Kesalahan database.');
@@ -131,7 +145,7 @@ class TransaksiManagementController extends BaseController
                 $this->db->transCommit();
                 session()->setFlashdata('message', 'Permintaan penghapusan transaksi #' . esc($transaksi_id) . ' telah ditolak. Stok produk telah disesuaikan kembali.');
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) { 
             $this->db->transRollback();
             log_message('error', '[RejectDeletionOwner] Exception: ' . $e->getMessage());
             session()->setFlashdata('error', 'Terjadi kesalahan internal saat menolak: ' . $e->getMessage());
@@ -149,7 +163,7 @@ class TransaksiManagementController extends BaseController
         $pemilik_id = $this->session->get('karyawan_id');
 
         $transaksi = $this->transaksiModel->where('transaksi_id', $transaksi_id)
-                                          ->where('status_penghapusan', 'approved_for_deletion') // Hanya bisa hapus yang sudah diapprove
+                                          ->where('status_penghapusan', 'approved_for_deletion') 
                                           ->first();
 
         if (!$transaksi) {

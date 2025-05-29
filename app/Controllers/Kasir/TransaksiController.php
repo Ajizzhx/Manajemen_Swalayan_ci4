@@ -485,10 +485,10 @@ class TransaksiController extends BaseController
 
                         if ($this->pelangganModel->update($pelangganId, ['poin' => $poinBaru])) {
                             log_message('info', "[ProsesPembayaran] Poin berhasil ditambahkan untuk pelanggan ID: " . $pelangganId . ". Poin diperoleh: " . $poinDiperolehTransaksiIni . ". Total poin baru: " . $poinBaru);
-                            // (Opsional) Catat ke riwayat_poin jika ada modelnya
+                           
                         } else {
                             log_message('error', "[ProsesPembayaran] Gagal update poin untuk pelanggan ID: " . $pelangganId);
-                            // Pertimbangkan apakah ini harus menjadi error kritis atau hanya log
+                           
                         }
                     }
                 }
@@ -631,9 +631,9 @@ class TransaksiController extends BaseController
         }
 
         $data['title'] = 'Riwayat Transaksi'; 
-
-        $builder = $this->db->table('transaksi AS t'); 
-        $builder->select("t.*, COALESCE(p.nama, 'Pelanggan Umum') as nama_pelanggan", false); 
+        
+        $builder = $this->db->table('transaksi AS t');
+        $builder->select("t.*, COALESCE(p.nama, 'Pelanggan Umum') as nama_pelanggan, t.alasan_penolakan_owner", false); 
         $builder->join('pelanggan p', 'p.pelanggan_id = t.pelanggan_id', 'left'); 
         $builder->where('t.is_deleted', 0); 
         $builder->where('t.karyawan_id', $kasir_id); 
@@ -646,7 +646,7 @@ class TransaksiController extends BaseController
 
         // Filter berdasarkan ID Transaksi
         if ($search_id_transaksi) {
-            // Ubah filter untuk mencari berdasarkan kode_transaksi
+            
             $builder->like('t.transaksi_id', $search_id_transaksi, 'both'); 
         }
 
@@ -672,12 +672,15 @@ class TransaksiController extends BaseController
         $data['tanggal_akhir'] = $tanggal_akhir;
         $data['selected_metode_pembayaran'] = $metode_pembayaran;
         $data['selected_id_transaksi'] = $search_id_transaksi;
-        // Ambil daftar metode pembayaran yang pernah digunakan oleh kasir ini
+       
         $data['metode_pembayaran_list'] = $this->transaksiModel->select('metode_pembayaran')->distinct()->where('is_deleted', 0)->where('karyawan_id', $kasir_id)->where('metode_pembayaran IS NOT NULL')->where("metode_pembayaran != ''")->findAll();
         
         $data['kasir_rejected_request_count'] = $this->transaksiModel
             ->where('karyawan_id', $kasir_id)
             ->where('status_penghapusan', 'rejected')->where('is_deleted', 0)->countAllResults();
+
+        
+        $this->session->set('kasir_rejected_notification_seen', true);
 
 
         return view('Backend/Kasir/RiwayatTransaksi/index', $data);
@@ -697,7 +700,7 @@ class TransaksiController extends BaseController
 
         // Fetch main transaction data
         $transaksi = $this->db->table('transaksi AS t') 
-            ->select('t.*, p.nama as nama_pelanggan, p.diskon_persen as diskon_pelanggan_saat_transaksi, k.nama as nama_kasir') 
+            ->select('t.*, p.nama as nama_pelanggan, p.diskon_persen as diskon_pelanggan_saat_transaksi, k.nama as nama_kasir, t.alasan_penolakan_owner') // Tambahkan t.alasan_penolakan_owner
             ->join('pelanggan p', 'p.pelanggan_id = t.pelanggan_id', 'left') 
             ->join('karyawan k', 'k.karyawan_id = t.karyawan_id', 'left')  
             ->where('t.transaksi_id', $transaksi_id) 
@@ -781,7 +784,7 @@ public function requestDeleteTransaksi($transaksi_id = null)
             // 1. Kembalikan stok produk
             $detailItems = $this->detailTransaksiModel
                 ->where('transaksi_id', $transaksi_id)
-                ->where('is_deleted', 0) // Pastikan hanya item yang belum terhapus (jika ada fitur hapus item)
+                ->where('is_deleted', 0)
                 ->findAll();
 
             if (empty($detailItems)) {
@@ -812,7 +815,7 @@ public function requestDeleteTransaksi($transaksi_id = null)
                             log_message('info', '[RequestDeleteKasir] Poin berhasil dikurangi untuk pelanggan ID: ' . $transaksi->pelanggan_id . ". Poin dikurangi: " . $poinDariTransaksiIni . ". Total poin baru: " . $poinBaru);
                         } else {
                             log_message('error', "[RequestDeleteKasir] Gagal update (kurangi) poin untuk pelanggan ID: " . $transaksi->pelanggan_id);
-                            // Pertimbangkan apakah ini harus menggagalkan seluruh rollback atau hanya di-log
+                           
                         }
                     }
                 }
@@ -821,9 +824,9 @@ public function requestDeleteTransaksi($transaksi_id = null)
             // 2. Update status transaksi
             $updateData = [
                 'status_penghapusan'       => 'pending_approval',
-                'alasan_pembatalan'        => $alasan, // Menggunakan nama kolom dari database Anda
-                'dibatalkan_oleh_karyawan_id' => $kasir_id_session, // Menggunakan nama kolom dari database Anda
-                'tanggal_dibatalkan'       => date('Y-m-d H:i:s'), // Menggunakan nama kolom dari database Anda
+                'alasan_pembatalan'        => $alasan, 
+                'dibatalkan_oleh_karyawan_id' => $kasir_id_session, 
+                'tanggal_dibatalkan'       => date('Y-m-d H:i:s'), 
 
             ];
             $this->transaksiModel->update($transaksi_id, $updateData);
@@ -859,6 +862,126 @@ public function requestDeleteTransaksi($transaksi_id = null)
         }
 
         return redirect()->to(site_url('kasir/riwayat-transaksi'));
+    }
+
+   
+    public function handleDeleteRequest($transaksi_id = null)
+    {
+        if (!$this->request->is('post')) {
+            log_message('error', '[handleDeleteRequest] Metode tidak diizinkan. Seharusnya POST.');
+            return $this->response->setStatusCode(405)->setJSON(['success' => false, 'message' => 'Metode tidak diizinkan.']);
+        }
+
+        if (!$transaksi_id) {
+            log_message('error', '[handleDeleteRequest] ID Transaksi tidak disediakan.');
+            return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => 'ID Transaksi tidak valid.']);
+        }
+
+        $status = $this->request->getPost('status'); // 'approved' atau 'rejected'
+        if (!in_array($status, ['approved', 'rejected'])) {
+            log_message('error', '[handleDeleteRequest] Status permintaan tidak valid: ' . $status);
+            return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => 'Status permintaan tidak valid.']);
+        }
+        
+        $alasan_penolakan = ($status === 'rejected') ? trim((string)$this->request->getPost('alasan_penolakan')) : null;
+
+        $transaksi = $this->transaksiModel->find($transaksi_id);
+        if (!$transaksi) {
+            log_message('error', '[handleDeleteRequest] Transaksi ID ' . $transaksi_id . ' tidak ditemukan.');
+            return $this->response->setStatusCode(404)->setJSON(['success' => false, 'message' => 'Transaksi tidak ditemukan.']);
+        }
+
+       
+        if ($transaksi->status_penghapusan !== 'pending_approval') {
+            log_message('warning', '[handleDeleteRequest] Transaksi ID ' . $transaksi_id . ' tidak dalam status pending_approval. Status saat ini: ' . $transaksi->status_penghapusan);
+           
+        }
+
+        $this->db->transBegin();
+        log_message('info', '[handleDeleteRequest] Memulai transaksi database untuk ID: ' . $transaksi_id . ', Status: ' . $status);
+        try {
+            if ($status === 'approved') {
+              
+                $this->transaksiModel->update($transaksi_id, ['status_penghapusan' => 'approved']);
+                log_message('info', '[handleDeleteRequest APPROVED] Transaksi ' . $transaksi_id . ' disetujui untuk dihapus.');
+              
+            } elseif ($status === 'rejected') {
+      
+                $this->transaksiModel->update($transaksi_id, [
+                    'status_penghapusan' => 'rejected',
+                    'alasan_penolakan_owner' => $alasan_penolakan,
+                ]);
+                log_message('info', "[handleDeleteRequest REJECTED] Transaksi ID {$transaksi_id} status diupdate ke 'rejected'. Alasan: '{$alasan_penolakan}'");
+
+                // 2. Sesuaikan stok: Karena transaksi TIDAK JADI DIBATALKAN,
+         
+                $detailItems = $this->detailTransaksiModel->where('transaksi_id', $transaksi_id)->findAll();
+                foreach ($detailItems as $item) {
+                    $this->produkModel->where('produk_id', $item->produk_id)
+                                      ->set('stok', 'stok - ' . (int)$item->jumlah, false)
+                                      ->update();
+                    log_message('debug', "[handleDeleteRequest REJECTED] Stok produk ID: {$item->produk_id} dikurangi sebanyak {$item->jumlah} untuk transaksi ID: {$transaksi_id}. Penjualan tetap valid.");
+                }
+                log_message('info', "[handleDeleteRequest REJECTED] Penyesuaian stok selesai untuk transaksi ID: {$transaksi_id}.");
+
+              
+                if ($transaksi->pelanggan_id) {
+                    log_message('debug', "[handleDeleteRequest REJECTED] Transaksi ID: {$transaksi_id} memiliki pelanggan_id: {$transaksi->pelanggan_id}. Memproses pengembalian poin.");
+                    $pelangganUntukPoin = $this->pelangganModel->find($transaksi->pelanggan_id);
+                    if ($pelangganUntukPoin) {
+                        log_message('debug', '[handleDeleteRequest REJECTED] Pelanggan ditemukan: ' . $pelangganUntukPoin->nama . '. Poin saat ini (setelah dikurangi saat request): ' . ($pelangganUntukPoin->poin ?? 0));
+
+                        $poinDariTransaksiIni = floor((float)$transaksi->total_harga / 10000);
+                        log_message('debug', '[handleDeleteRequest REJECTED] Poin yang dihitung dari transaksi ini (total_harga ' . $transaksi->total_harga . '): ' . $poinDariTransaksiIni);
+
+                        if ($poinDariTransaksiIni > 0) {
+                            $poinSaatIniDatabase = (int)($pelangganUntukPoin->poin ?? 0);
+                            $poinBaru = $poinSaatIniDatabase + $poinDariTransaksiIni; 
+                            log_message('debug', '[handleDeleteRequest REJECTED] Poin pelanggan akan diupdate menjadi: ' . $poinBaru);
+
+                            if ($this->pelangganModel->update($transaksi->pelanggan_id, ['poin' => $poinBaru])) {
+                                log_message('info', "[handleDeleteRequest REJECTED] Poin berhasil dikembalikan ke pelanggan ID: {$transaksi->pelanggan_id}. Poin ditambah: +{$poinDariTransaksiIni}. Total poin baru: {$poinBaru}.");
+                            } else {
+                                $modelErrors = $this->pelangganModel->errors();
+                                log_message('error', "[handleDeleteRequest REJECTED] Gagal mengembalikan poin ke pelanggan ID: {$transaksi->pelanggan_id}. Model errors: " . json_encode($modelErrors));
+                               
+                            }
+                        } else {
+                            log_message('info', '[handleDeleteRequest REJECTED] Tidak ada poin (' . $poinDariTransaksiIni . ') yang perlu dikembalikan dari transaksi ini (total_harga mungkin < 10000 atau 0).');
+                        }
+                    } else {
+                        log_message('warning', '[handleDeleteRequest REJECTED] Pelanggan dengan ID ' . $transaksi->pelanggan_id . ' tidak ditemukan untuk pengembalian poin.');
+                    }
+                } else {
+                    log_message('info', "[handleDeleteRequest REJECTED] Transaksi ID: {$transaksi_id} tidak memiliki pelanggan_id, tidak ada poin untuk dikembalikan.");
+                }
+                log_message('info', "[handleDeleteRequest REJECTED] Proses penolakan untuk transaksi ID: {$transaksi_id} selesai. Stok dan poin telah disesuaikan.");
+            }
+
+            if ($this->db->transStatus() === false) {
+                $this->db->transRollback();
+                log_message('error', '[handleDeleteRequest] Transaksi database gagal (rollback) untuk ID: ' . $transaksi_id);
+                return $this->response->setStatusCode(500)->setJSON(['success' => false, 'message' => 'Gagal memproses permintaan hapus. Terjadi kesalahan database.']);
+            } else {
+                $this->db->transCommit();
+                log_message('info', '[handleDeleteRequest] Transaksi database berhasil (commit) untuk ID: ' . $transaksi_id);
+                $pesanSukses = ($status === 'approved') ? 'Transaksi berhasil disetujui untuk dihapus.' : 'Permintaan hapus ditolak. Poin dan stok telah disesuaikan.';
+               
+                
+             
+                session()->setFlashdata('message', $pesanSukses);
+               
+                return redirect()->to(site_url('admin/owner-area/transaksi-approval')); // Contoh URL
+            }
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            log_message('error', '[handleDeleteRequest] Exception untuk ID ' . $transaksi_id . ': ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            // Untuk AJAX response
+            // return $this->response->setStatusCode(500)->setJSON(['success' => false, 'message' => 'Terjadi kesalahan internal: ' . $e->getMessage(), 'csrf_hash' => csrf_hash()]);
+            
+            session()->setFlashdata('error', 'Terjadi kesalahan internal: ' . $e->getMessage());
+            return redirect()->to(site_url('admin/owner-area/transaksi-approval')); // Contoh URL
+        }
     }
     
 }

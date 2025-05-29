@@ -62,6 +62,14 @@
                                         <th>Kasir</th>
                                         <td>: <?= esc($transaksi['nama_kasir'] ?? 'N/A') ?></td>
                                     </tr>
+                                <?php if (isset($transaksi['status_penghapusan']) && $transaksi['status_penghapusan'] === 'rejected' && !empty($transaksi['alasan_penolakan_owner'])): ?>
+                                <tr>
+                                    <th class="text-danger" style="vertical-align: top;">Alasan Ditolak</th>
+                                    <td style="vertical-align: top;">: <span class="text-danger"><em><?= nl2br(esc($transaksi['alasan_penolakan_owner'])) ?></em></span></td>
+                                </tr>
+                                <?php endif; ?>
+
+
                                 </table>
                             </div>
                             <div class="col-md-6">
