@@ -88,7 +88,7 @@
                     <?php if (session()->getFlashdata('error')): ?>
                         <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
                     <?php endif; ?>
-                    <table data-toggle="table" data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-search="true" data-pagination="true" data-sort-name="tanggal" data-sort-order="desc">
+                    <table data-toggle="table" data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-search="true" data-pagination="true" data-sort-name="kode_transaksi" data-sort-order="desc">
                         <thead>
                         <tr>
                             <th data-field="kode_transaksi" data-sortable="true">ID/Kode Transaksi</th>
