@@ -37,7 +37,9 @@
 						} // Pemilik juga diarahkan ke admin/dashboard
 					}
 				?>
-				<a class="navbar-brand" href="<?= $dashboard_url ?>"><span>Toko Dolog Sihite</span> 3</a>
+				<a class="navbar-brand" href="<?= $dashboard_url ?>">
+					<span class="brand-highlight">Toko Dolog Sihite</span> <span class="brand-sub">3</span>
+				</a>
 				<ul class="user-menu">
 					<li class="dropdown pull-right">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> <?= esc(session()->get('nama_karyawan') ?? session()->get('nama') ?? 'User') ?> <span class="caret"></span></a>

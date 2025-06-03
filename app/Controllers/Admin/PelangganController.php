@@ -52,12 +52,13 @@ class PelangganController extends BaseController
         $data = [
             'pelanggan_id' => $pelanggan_id, // Simpan ID yang di-generate
             'nama'          => $this->request->getPost('nama'),
+            'no_ktp'        => $this->request->getPost('no_ktp'), // Simpan no_ktp
             'email'         => $this->request->getPost('email'),
             'telepon'       => $this->request->getPost('telepon'),
             'alamat'        => $this->request->getPost('alamat'),
             'diskon_persen' => (float)($this->request->getPost('diskon_persen') ?? 1.00),
             'poin'          => (int)($this->request->getPost('poin') ?? 0), // Tambahkan poin
-            'is_deleted'    => 0, 
+            'is_deleted'    => 0
         ];
 
         $this->auditLogModel->insert([
@@ -99,51 +100,63 @@ class PelangganController extends BaseController
             return redirect()->to('/admin/pelanggan');
         }
 
-        
-        $rules = $this->pelangganModel->getValidationRules();
-        
-        $rules['email']   = str_replace('{id}', $id, $rules['email'] ?? 'permit_empty|valid_email|max_length[100]');
-        $rules['telepon'] = str_replace('{id}', $id, $rules['telepon'] ?? 'permit_empty|max_length[20]');
-
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('validation', $this->validator);
-        }
-
-        
+        // Cek perubahan data sebelum validasi unik
         $updateData = [
             'nama'          => $this->request->getPost('nama'),
             'alamat'        => $this->request->getPost('alamat'),
             'diskon_persen' => (float)($this->request->getPost('diskon_persen') ?? 0.00), 
-            'poin'          => (int)($this->request->getPost('poin') ?? $pelanggan->poin ?? 0), // Tambahkan poin
+            'poin'          => (int)($this->request->getPost('poin') ?? $pelanggan->poin ?? 0),
+            'no_ktp'        => $this->request->getPost('no_ktp'),
         ];
-
-        
         $submitted_email = trim((string)$this->request->getPost('email'));
-        $original_email = trim((string)($pelanggan->email ?? '')); 
+        $original_email = trim((string)($pelanggan->email ?? ''));
         if ($submitted_email !== $original_email) {
             $updateData['email'] = $submitted_email;
         }
-
-        
         $submitted_telepon = trim((string)$this->request->getPost('telepon'));
-        $original_telepon = trim((string)($pelanggan->telepon ?? '')); 
+        $original_telepon = trim((string)($pelanggan->telepon ?? ''));
         if ($submitted_telepon !== $original_telepon) {
             $updateData['telepon'] = $submitted_telepon;
         }
-
-        
         $isDataChanged = ($updateData['nama'] !== $pelanggan->nama) ||
                          ($updateData['alamat'] !== $pelanggan->alamat) ||
                          ($updateData['diskon_persen'] != ($pelanggan->diskon_persen ?? 0.00)) || 
-                         ($updateData['poin'] != ($pelanggan->poin ?? 0)) || // Cek perubahan poin
-                         (isset($updateData['email'])) ||
-                         (isset($updateData['telepon']));
+                         ($updateData['poin'] != ($pelanggan->poin ?? 0)) ||
+                         (isset($updateData['email']) && $updateData['email'] !== $pelanggan->email) ||
+                         (isset($updateData['telepon']) && $updateData['telepon'] !== $pelanggan->telepon) ||
+                         ($updateData['no_ktp'] !== $pelanggan->no_ktp);
 
         if (!$isDataChanged) {
             session()->setFlashdata('message', 'Tidak ada perubahan data.');
             return redirect()->to('/admin/pelanggan');
         }
+
+        $rules = $this->pelangganModel->getValidationRules();
+        $rules['email']   = str_replace('{id}', $id, $rules['email'] ?? 'permit_empty|valid_email|max_length[100]');
+        $rules['telepon'] = str_replace('{id}', $id, $rules['telepon'] ?? 'permit_empty|max_length[20]');
+        $rules['no_ktp']  = str_replace('{id}', $id, $rules['no_ktp'] ?? 'required|numeric|min_length[8]|max_length[32]|is_unique[pelanggan.no_ktp,pelanggan_id,{id}]');
+
+        if (!$this->validate($rules)) {
+            $validation = $this->validator;
+            $errorMsgKtp = $validation->getError('no_ktp');
+            $errorMsgEmail = $validation->getError('email');
+            $errorMsgTelepon = $validation->getError('telepon');
+            if ($errorMsgKtp && (strpos($errorMsgKtp, 'unique') !== false || strpos($errorMsgKtp, 'sudah terdaftar') !== false || strpos($errorMsgKtp, 'No KTP sudah digunakan') !== false)) {
+                session()->setFlashdata('error', 'No KTP sudah digunakan oleh member lain.');
+            } else if ($errorMsgEmail && (strpos($errorMsgEmail, 'unique') !== false || strpos($errorMsgEmail, 'sudah terdaftar') !== false)) {
+                session()->setFlashdata('error', 'Email sudah digunakan oleh member lain.');
+            } else if ($errorMsgTelepon && (strpos($errorMsgTelepon, 'unique') !== false || strpos($errorMsgTelepon, 'sudah terdaftar') !== false)) {
+                session()->setFlashdata('error', 'Nomor telepon sudah digunakan oleh member lain.');
+            } else if ($errorMsgKtp) {
+                session()->setFlashdata('error', $errorMsgKtp);
+            } else if ($errorMsgEmail) {
+                session()->setFlashdata('error', $errorMsgEmail);
+            } else if ($errorMsgTelepon) {
+                session()->setFlashdata('error', $errorMsgTelepon);
+            }
+            return redirect()->back()->withInput()->with('validation', $validation);
+        }
+
         if ($this->pelangganModel->update($id, $updateData)) {
             // Log Audit
             $this->auditLogModel = new AuditLogModel();

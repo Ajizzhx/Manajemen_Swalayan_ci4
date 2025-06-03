@@ -9,13 +9,14 @@ Version: 1.0
 /*Global Styles*/
 
 body {
-	background: #f1f4f7;
+	background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 40%, #b2f7cc 100%); /* Gradasi pastel biru ke hijau */
 	padding-top: 50px;
-	color: #5f6468;
+	color: #4a4a4a; /* Teks utama lebih gelap agar mudah dibaca */
+	font-family: 'Segoe UI', 'Arial', sans-serif;
 }
 
 p {
-	color: #777;
+	color: #b0b8c1;
 }
 
 a, button {
@@ -23,21 +24,22 @@ a, button {
 }
 
 a, a:hover, a:focus {
-	color: #ff3030; /* Menggunakan warna primer untuk link agar lebih konsisten */
+	color: #ffb53e; /* Warna aksen oranye cerah */
 	text-decoration: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
-	color: #5f6468;
+	color: #fff;
 }
 
 h1 {
-	font-weight: 300;
+	font-weight: 400;
 	font-size: 40px;
+	text-shadow: 1px 2px 8px #23252644;
 }
 
 h2 {
-	font-weight: 300;
+	font-weight: 400;
 	margin-bottom: 20px;
 }
 
@@ -95,14 +97,26 @@ h3, h4 {
 
 .navbar-header .navbar-brand {
 	color: #fff;
-	font-size: 16px;
+	font-size: 18px;
 	text-transform: uppercase;
-	font-weight: 500;
+	font-weight: 600;
 	letter-spacing: 2px;
+	text-shadow: 1px 2px 8px #fc4a1a33;
 }
 
 .navbar-header .navbar-brand span {
-	color: #ff3030;
+	color: #f7b733;
+}
+
+.navbar-header .navbar-brand .brand-highlight {
+	color: #fff;
+	text-shadow: 0 2px 8px #fc4a1a99, 0 1px 0 #444;
+	font-weight: 700;
+}
+.navbar-header .navbar-brand .brand-sub {
+	color: #56ccf2;
+	font-weight: 700;
+	margin-left: 2px;
 }
 
 /*Buttons*/
@@ -168,8 +182,17 @@ fieldset[disabled] .btn-primary:active,
 .btn-primary.disabled.active,
 .btn-primary[disabled].active,
 fieldset[disabled] .btn-primary.active {
-	background-color: #ff3030;
-	border-color: #ff3030;
+	background: linear-gradient(90deg, #ffb53e 0%, #ef473a 100%);
+	border: none;
+	color: #fff;
+	font-weight: 600;
+	box-shadow: 0 2px 8px #23252633;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+	background: linear-gradient(90deg, #ef473a 0%, #ffb53e 100%);
+	color: #fff;
+	opacity: 0.9;
 }
 
 .btn-success,
@@ -193,8 +216,15 @@ fieldset[disabled] .btn-success:active,
 .btn-success.disabled.active,
 .btn-success[disabled].active,
 fieldset[disabled] .btn-success.active {
-	background-color: #8ad919;
-	border-color: #8ad919;
+	background: linear-gradient(90deg, #38ef7d 0%, #11998e 100%);
+	border: none;
+	color: #fff;
+	font-weight: 600;
+}
+.btn-success:hover, .btn-success:focus {
+	background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+	color: #fff;
+	opacity: 0.9;
 }
 
 .btn-warning,
@@ -218,8 +248,15 @@ fieldset[disabled] .btn-warning:active,
 .btn-warning.disabled.active,
 .btn-warning[disabled].active,
 fieldset[disabled] .btn-warning.active {
-	background-color: #ffb53e;
-	border-color: #ffb53e;
+	background: linear-gradient(90deg, #ffb53e 0%, #ffcc33 100%);
+	border: none;
+	color: #fff;
+	font-weight: 600;
+}
+.btn-warning:hover, .btn-warning:focus {
+	background: linear-gradient(90deg, #ffcc33 0%, #ffb53e 100%);
+	color: #fff;
+	opacity: 0.9;
 }
 
 .btn-danger,
@@ -243,8 +280,15 @@ fieldset[disabled] .btn-danger:active,
 .btn-danger.disabled.active,
 .btn-danger[disabled].active,
 fieldset[disabled] .btn-danger.active {
-	background-color: #f9243f;
-	border-color: #f9243f;
+	background: linear-gradient(90deg, #ef473a 0%, #cb2d3e 100%);
+	border: none;
+	color: #fff;
+	font-weight: 600;
+}
+.btn-danger:hover, .btn-danger:focus {
+	background: linear-gradient(90deg, #cb2d3e 0%, #ef473a 100%);
+	color: #fff;
+	opacity: 0.9;
 }
 
 /*Backgrounds*/
@@ -321,8 +365,9 @@ a.bg-danger:hover {
 }
 
 .panel-footer {
-	background: #fff;
+	background: linear-gradient(90deg, #f7b733 0%, #fc4a1a 100%);
 	border-top: 1px solid #eee;
+	color: #fff;
 }
 
 .panel-widget {
@@ -354,10 +399,10 @@ a.bg-danger:hover {
 	text-decoration: none;
 }
 
-.panel-blue { background: #ff3030; color: #fff; }
-.panel-teal { background: #1ebfae; color: #fff; }
-.panel-orange { background: #ffb53e; color: #fff; }
-.panel-red { background: #f9243f; color: #fff; }
+.panel-blue { background: linear-gradient(135deg, #56ccf2 0%, #2f80ed 100%); color: #fff; }
+.panel-teal { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: #fff; }
+.panel-orange { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); color: #fff; }
+.panel-red { background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%); color: #fff; }
 
 .panel-blue .panel-body p,
 .panel-teal .panel-body p,
@@ -502,6 +547,7 @@ a.bg-danger:hover {
 /*Navbar*/
 
 .navbar {
+	background: linear-gradient(90deg, #f7b733 0%, #fc4a1a 100%); /* Oranye ke merah soft */
 	border: 0;
 }
 
@@ -565,7 +611,7 @@ a.bg-danger:hover {
 		overflow-x: hidden;
 		overflow-y: auto; 
 		background-color: #fff;
-		box-shadow: 1px 0px 10px rgba(0, 0, 0, .05);
+		box-shadow: 1px 0px 10px rgba(252, 74, 26, 0.08);
 	}
 	.navbar-header {
 		width: 100%;
@@ -574,15 +620,15 @@ a.bg-danger:hover {
 
 .sidebar ul.nav a:hover, 
 .sidebar ul.nav li.parent ul li a:hover {
-	text-decoration: none;
-	background-color: #e9ecf2;
+	background-color: #ffe0c3;
+	color: #fc4a1a !important;
 }
 
 .sidebar ul.nav .active a, .sidebar ul.nav li.parent a.active,
 .sidebar ul.nav .active > a:hover, .sidebar ul.nav li.parent a.active:hover,
 .sidebar ul.nav .active > a:focus, .sidebar ul.nav li.parent a.active:focus {
 	color: #fff;
-	background-color: #30a5ff;
+	background-color: #fc4a1a;
 }*/
 
 .sidebar ul.nav ul,
@@ -846,6 +892,7 @@ h1.page-header {
 /*Tables*/
 .table {
 	background: #fff;
+	color: #4a4a4a;
 }
 
 .fixed-table-container {
@@ -853,15 +900,12 @@ h1.page-header {
 }
 
 .fixed-table-container thead th {
-	background: #f7f7f8;
-	border-color: #e9ecf2; /* Border lebih lembut */
-	color: #5f6468;
-	font-weight: normal; /* Berat font standar untuk keterbacaan */
-	font-size: 16px;
+	background: #f7b733;
+	color: #fff;
 }
 
 .fixed-table-container tbody td {
-	border: 1px solid #e9ecf2; /* Border lebih lembut dan konsisten */
+	border: 1px solid #ffe0c3;
 }
 
 .fixed-table-container tbody td:last-child {
@@ -885,5 +929,5 @@ h1.page-header {
 
 /* Hover state untuk baris tabel */
 .table-hover>tbody>tr:hover {
-    background-color: #f5f8fa; /* Warna hover yang sangat lembut */
+    background-color: #fff7e6;
 }

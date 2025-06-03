@@ -176,6 +176,16 @@ class TransaksiController extends BaseController
 
        
         $rules = [
+            'no_ktp_pelanggan' => [
+                'rules' => 'required|numeric|min_length[8]|max_length[32]|is_unique[pelanggan.no_ktp]',
+                'errors' => [
+                    'required' => 'No KTP wajib diisi.',
+                    'numeric' => 'No KTP hanya boleh berisi angka.',
+                    'min_length' => 'No KTP minimal 8 digit.',
+                    'max_length' => 'No KTP maksimal 32 digit.',
+                    'is_unique' => 'No KTP sudah digunakan oleh member lain.'
+                ]
+            ],
             'nama_pelanggan'    => [
                 'rules'  => 'required|min_length[3]|max_length[100]',
                 'errors' => [
@@ -199,6 +209,7 @@ class TransaksiController extends BaseController
             $pelanggan_id_baru = generate_sequential_id('PLG', $this->pelangganModel, 'pelanggan_id', 5); // PLG00001
             $data = [
                 'pelanggan_id'  => $pelanggan_id_baru,
+                'no_ktp'        => trim((string)($postData['no_ktp_pelanggan'] ?? '')),
                 'nama'          => trim((string)($postData['nama_pelanggan'] ?? '')),
                 'email'         => trim((string)($postData['email_pelanggan'] ?? '')),
                 'telepon'       => trim((string)($postData['telepon_pelanggan'] ?? '')),
@@ -221,7 +232,7 @@ class TransaksiController extends BaseController
                         'description' => 'Menambah member baru dari POS: ' . $data['nama'] . ' (ID: ' . $pelanggan_id_baru . ')',
                     ]);
 
-                    
+
                     $newPelanggan = $this->pelangganModel->find($pelanggan_id_baru);
                     $pelangganDataForJs = null;
                     if ($newPelanggan) {
@@ -261,6 +272,25 @@ class TransaksiController extends BaseController
         } else { // Validasi gagal
             $validationErrors = $this->validator->getErrors();
             log_message('warning', '[TransaksiController::addPelanggan] Validation failed: ' . json_encode($validationErrors));
+            if (!$this->validate($rules)) {
+                $validationErrors = $this->validator->getErrors();
+                $customError = null;
+                if (!empty($validationErrors['no_ktp_pelanggan']) && (strpos($validationErrors['no_ktp_pelanggan'], 'unique') !== false || strpos($validationErrors['no_ktp_pelanggan'], 'sudah digunakan') !== false)) {
+                    $customError = 'No KTP sudah digunakan oleh member lain.';
+                } else if (!empty($validationErrors['email_pelanggan']) && (strpos($validationErrors['email_pelanggan'], 'unique') !== false || strpos($validationErrors['email_pelanggan'], 'sudah digunakan') !== false)) {
+                    $customError = 'Email sudah digunakan oleh member lain.';
+                } else if (!empty($validationErrors['telepon_pelanggan']) && (strpos($validationErrors['telepon_pelanggan'], 'unique') !== false || strpos($validationErrors['telepon_pelanggan'], 'sudah digunakan') !== false)) {
+                    $customError = 'Nomor telepon sudah digunakan oleh member lain.';
+                } else if (!empty($validationErrors['telepon_pelanggan']) && strpos($validationErrors['telepon_pelanggan'], 'unique') !== false) {
+                    $customError = 'Nomor telepon sudah digunakan oleh member lain.';
+                }
+                return $this->response->setJSON([
+                    'success' => false,
+                    'errors' => $validationErrors,
+                    'message' => $customError ?? (reset($validationErrors) ?: 'Data yang Anda masukkan tidak valid.'),
+                    'csrf_hash' => csrf_hash()
+                ]);
+            }
             return $this->response->setJSON(['success' => false, 'errors' => $validationErrors, 'message' => 'Data yang Anda masukkan tidak valid.', 'csrf_hash' => csrf_hash()]);
         }
     }

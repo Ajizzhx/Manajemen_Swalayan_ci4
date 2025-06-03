@@ -108,7 +108,7 @@
                 <div class="panel-heading">
                     Daftar Semua Transaksi
                     <a href="<?= site_url('admin/laporan/transaksi/export?' . esc($current_query_string ?? '')) ?>" class="btn btn-success btn-sm pull-right" style="margin-left: 10px;">
-                        <span class="glyphicon glyphicon-download-alt"></span> Unduh Excel
+                        <span class="glyphicon glyphicon-download-alt"></span> Unduh csv
                     </a>
                     <span class="pull-right clickable panel-toggle panel-button-tab-left"><em class="fa fa-toggle-up"></em></span>
                 </div>

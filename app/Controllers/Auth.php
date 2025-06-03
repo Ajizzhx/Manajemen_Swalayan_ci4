@@ -98,6 +98,36 @@ class Auth extends BaseController
                     'role'        => $karyawan['role'],
                     'isLoggedIn'  => TRUE
                 ];
+                // Jika role pemilik, lakukan 2FA OTP
+                if ($karyawan['role'] == 'pemilik') {
+                    // Generate OTP 6 digit
+                    $otp = random_int(100000, 999999);
+                    $otpData = [
+                        'otp_code' => $otp,
+                        'otp_expires' => time() + 300, // 5 menit
+                        'email' => $karyawan['email'],
+                        'karyawan_id' => $karyawan['karyawan_id'],
+                    ];
+                    $this->session->set('2fa_karyawan_data', $otpData);
+                    // Kirim OTP ke email
+                    $emailService = \Config\Services::email();
+                    $emailService->setFrom('no-reply@swalayan.com', 'Swalayan 2FA');
+                    $emailService->setTo($karyawan['email']);
+                    $emailService->setSubject('Kode OTP Login Owner Swalayan');
+                    $emailService->setMessage('Kode OTP Anda: <b>' . $otp . '</b>\nKode berlaku 5 menit.');
+                    $emailService->send();
+                    // Simpan audit log
+                    $auditLogModel = new AuditLogModel();
+                    $auditLogModel->insert([
+                        'user_id' => $karyawan['karyawan_id'],
+                        'action' => 'LOGIN_2FA_OTP_SENT',
+                        'description' => 'OTP dikirim ke email owner: ' . $karyawan['email'],
+                        'ip_address' => $this->request->getIPAddress(),
+                        'user_agent' => $this->request->getUserAgent()->getAgentString(),
+                    ]);
+                    // Redirect ke halaman verifikasi OTP
+                    return redirect()->to(site_url('auth/verify-otp'));
+                }
                 $this->session->set($sessData);
                  $auditLogModel = new AuditLogModel(); 
                  $auditLogModel->insert([
@@ -177,5 +207,80 @@ class Auth extends BaseController
         $this->session->destroy();
         return redirect()->to('/login')->with('success', 'Anda telah berhasil logout.');
 
+    }
+    public function verifyOtp()
+    {
+        // Cek jika data OTP ada di session
+        $otpData = $this->session->get('2fa_karyawan_data');
+        if (!$otpData) {
+            return redirect()->to('/login')->with('error', 'Akses tidak valid.');
+        }
+        return view('Backend/Login/verify_otp');
+    }
+
+    public function processOtp()
+    {
+        $otpData = $this->session->get('2fa_karyawan_data');
+        if (!$otpData) {
+            return redirect()->to('/login')->with('error', 'Akses tidak valid.');
+        }
+        $inputOtp = $this->request->getPost('otp_code');
+        if (!$inputOtp || !preg_match('/^\d{6}$/', $inputOtp)) {
+            return redirect()->back()->withInput()->with('error', 'Kode OTP tidak valid.');
+        }
+        if (time() > $otpData['otp_expires']) {
+            return redirect()->back()->with('error', 'Kode OTP sudah kadaluarsa.');
+        }
+        if ($inputOtp != $otpData['otp_code']) {
+            return redirect()->back()->with('error', 'Kode OTP salah.');
+        }
+        // OTP benar, set session login owner
+        $sessData = [
+            'karyawan_id' => $otpData['karyawan_id'],
+            'email' => $otpData['email'],
+            'role' => 'pemilik',
+            'isLoggedIn' => TRUE
+        ];
+        $this->session->set($sessData);
+        $this->session->remove('2fa_karyawan_data');
+        // Audit log
+        $auditLogModel = new AuditLogModel();
+        $auditLogModel->insert([
+            'user_id' => $otpData['karyawan_id'],
+            'action' => 'LOGIN_2FA_SUCCESS',
+            'description' => 'Owner login sukses dengan OTP.',
+            'ip_address' => $this->request->getIPAddress(),
+            'user_agent' => $this->request->getUserAgent()->getAgentString(),
+        ]);
+        return redirect()->to('/admin/dashboard')->with('success', 'Login berhasil! Selamat datang, Pemilik.');
+    }
+
+    public function resendOtp()
+    {
+        $otpData = $this->session->get('2fa_karyawan_data');
+        if (!$otpData) {
+            return redirect()->to('/login')->with('error', 'Akses tidak valid.');
+        }
+        $otp = random_int(100000, 999999);
+        $otpData['otp_code'] = $otp;
+        $otpData['otp_expires'] = time() + 300;
+        $this->session->set('2fa_karyawan_data', $otpData);
+        // Kirim ulang OTP ke email
+        $emailService = \Config\Services::email();
+        $emailService->setFrom('no-reply@swalayan.com', 'Swalayan 2FA');
+        $emailService->setTo($otpData['email']);
+        $emailService->setSubject('Kode OTP Login Owner Swalayan');
+        $emailService->setMessage('Kode OTP Anda: <b>' . $otp . '</b>\nKode berlaku 5 menit.');
+        $emailService->send();
+        // Audit log
+        $auditLogModel = new AuditLogModel();
+        $auditLogModel->insert([
+            'user_id' => $otpData['karyawan_id'],
+            'action' => 'LOGIN_2FA_OTP_RESEND',
+            'description' => 'OTP dikirim ulang ke email owner: ' . $otpData['email'],
+            'ip_address' => $this->request->getIPAddress(),
+            'user_agent' => $this->request->getUserAgent()->getAgentString(),
+        ]);
+        return redirect()->back()->with('message', 'Kode OTP baru telah dikirim ke email Anda.');
     }
 }

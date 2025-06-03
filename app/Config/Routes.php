@@ -13,6 +13,11 @@ $routes->post('auth/loginProcess', 'Auth::loginProcess', ['as' => 'login.process
 
 $routes->get('logout', 'Auth::logout', ['as' => 'logout']);
 
+// Route for 2FA
+$routes->get('auth/verify-otp', 'Auth::verifyOtp');
+$routes->post('auth/process-otp', 'Auth::processOtp');
+$routes->get('auth/resend-otp', 'Auth::resendOtp');
+
 // --- ADMIN & PEMILIK GROUP ---
 $routes->group('admin', ['filter' => 'roleGuard:admin,pemilik', 'namespace' => 'App\Controllers\Admin'], static function ($routes) {
     $routes->get('/', 'DashboardController::index', ['as' => 'admin.dashboard.index']); // Mengarahkan /admin ke dashboard

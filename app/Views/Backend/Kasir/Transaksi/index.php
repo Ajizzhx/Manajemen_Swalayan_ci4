@@ -151,6 +151,10 @@
                     <div class="modal-body">
                         <div id="pelanggan_form_error" class="alert alert-danger" style="display:none;"></div>
                         <div class="form-group">
+                            <label for="no_ktp_pelanggan">No KTP <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="no_ktp_pelanggan" name="no_ktp_pelanggan" required pattern="[0-9]{8,32}" maxlength="32" minlength="8" title="Masukkan No KTP (8-32 digit angka, unik)">
+                        </div>
+                        <div class="form-group">
                             <label for="nama_pelanggan">Nama Member <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nama_pelanggan" name="nama_pelanggan" required>
                         </div>
@@ -753,6 +757,13 @@ $(document).ready(function() {
         const cartTableBody = $('#cart_table tbody');
         cartTableBody.empty();
         let subtotalKotor = 0; 
+        
+        // Reset and reapply uang bayar based on payment method when cart changes
+        const metodePembayaran = $('#metode_pembayaran').val();
+        if (metodePembayaran !== 'tunai') {
+            const event = new Event('change', { bubbles: true });
+            document.getElementById('metode_pembayaran').dispatchEvent(event);
+        }
 
         if (cart.length === 0) {
             $('#cart_empty_message').show();
@@ -1180,5 +1191,26 @@ $(document).ready(function() {
     function formatCurrencySimple(amount) { 
         return 'Rp ' + Number(amount).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
+
+    $('#metode_pembayaran').on('change', function() {
+        const metodePembayaran = $(this).val();
+        const totalHargaNeto = parseFloat($('#total_neto_display').text().replace(/[^0-9]/g, ''));
+        
+        if (metodePembayaran !== 'tunai') {
+            // Untuk pembayaran non-tunai, set uang bayar sama dengan total
+            uangBayarDisplay.value = totalHargaNeto.toLocaleString('id-ID');
+            uangBayarHidden.value = totalHargaNeto;
+            $('#uang_bayar_display').prop('readonly', true);
+            var event = new Event('input', { bubbles: true, cancelable: true });
+            uangBayarHidden.dispatchEvent(event);
+        } else {
+            // Untuk pembayaran tunai, biarkan input manual dan reset nilai
+            $('#uang_bayar_display').prop('readonly', false);
+            uangBayarDisplay.value = '';
+            uangBayarHidden.value = '';
+            var event = new Event('input', { bubbles: true, cancelable: true });
+            uangBayarHidden.dispatchEvent(event);
+        }
+    });
 });
 </script>

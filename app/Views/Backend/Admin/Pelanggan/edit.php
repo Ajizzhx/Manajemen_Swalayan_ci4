@@ -39,6 +39,10 @@
                 <?= form_open('/admin/pelanggan/update/' . $pelanggan->pelanggan_id) ?>
                     <?= csrf_field() ?>
                     <div class="form-group">
+                        <label for="no_ktp">No KTP <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="no_ktp" name="no_ktp" value="<?= old('no_ktp', $pelanggan->no_ktp ?? '') ?>" required pattern="[0-9]{8,32}" maxlength="32" minlength="8" title="Masukkan No KTP (8-32 digit angka, unik)">
+                    </div>
+                    <div class="form-group">
                         <label for="nama">Nama Member <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="nama" name="nama" value="<?= old('nama', $pelanggan->nama) ?>" required>
                     </div>

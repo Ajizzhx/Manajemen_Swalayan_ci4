@@ -55,7 +55,18 @@
 
                     <p>Silakan kunjungi halaman <a href="<?= site_url(session()->get('role') . '/profile') ?>">Profil</a> Anda untuk memperbarui informasi pribadi dan password.</p>
 
-                    <a href="<?= site_url(session()->get('role') . '/dashboard') ?>" class="btn btn-default" style="margin-top: 15px;">Kembali ke Dashboard</a>
+                    <?php
+                    $dashboardBackUrl = '';
+                    $role = session()->get('role');
+                    if ($role === 'admin' || $role === 'pemilik') {
+                        $dashboardBackUrl = site_url('admin/dashboard');
+                    } elseif ($role === 'kasir') {
+                        $dashboardBackUrl = site_url('kasir/dashboard');
+                    } else {
+                        $dashboardBackUrl = site_url('/');
+                    }
+                    ?>
+                    <a href="<?= $dashboardBackUrl ?>" class="btn btn-default" style="margin-top: 15px;">Kembali ke Dashboard</a>
                 </div>
             </div>
         </div> <!-- /.col-md-8 -->
