@@ -87,12 +87,13 @@ h3, h4 {
 .form-control {
 	border: 1px solid #eee;
 	box-shadow: none;
+	transition: all 0.3s ease;
 }
 
 .form-control:focus {
 	border: 1px solid #ff3030;
 	outline: 0;
-	box-shadow: inset 0px 0px 0px 1px #ff3030;
+	box-shadow: 0 0 0 3px rgba(255, 48, 48, 0.1);
 }
 
 .navbar-header .navbar-brand {
@@ -165,23 +166,7 @@ fieldset[disabled] .btn-default.active {
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active,
-.btn-primary.active,
-.open > .dropdown-toggle.btn-primary,
-.btn-primary.disabled,
-.btn-primary[disabled],
-fieldset[disabled] .btn-primary,
-.btn-primary.disabled:hover,
-.btn-primary[disabled]:hover,
-fieldset[disabled] .btn-primary:hover,
-.btn-primary.disabled:focus,
-.btn-primary[disabled]:focus,
-fieldset[disabled] .btn-primary:focus,
-.btn-primary.disabled:active,
-.btn-primary[disabled]:active,
-fieldset[disabled] .btn-primary:active,
-.btn-primary.disabled.active,
-.btn-primary[disabled].active,
-fieldset[disabled] .btn-primary.active {
+.btn-primary.active {
 	background: linear-gradient(90deg, #ffb53e 0%, #ef473a 100%);
 	border: none;
 	color: #fff;
@@ -199,23 +184,7 @@ fieldset[disabled] .btn-primary.active {
 .btn-success:hover,
 .btn-success:focus,
 .btn-success:active,
-.btn-success.active,
-.open > .dropdown-toggle.btn-success,
-.btn-success.disabled,
-.btn-success[disabled],
-fieldset[disabled] .btn-success,
-.btn-success.disabled:hover,
-.btn-success[disabled]:hover,
-fieldset[disabled] .btn-success:hover,
-.btn-success.disabled:focus,
-.btn-success[disabled]:focus,
-fieldset[disabled] .btn-success:focus,
-.btn-success.disabled:active,
-.btn-success[disabled]:active,
-fieldset[disabled] .btn-success:active,
-.btn-success.disabled.active,
-.btn-success[disabled].active,
-fieldset[disabled] .btn-success.active {
+.btn-success.active {
 	background: linear-gradient(90deg, #38ef7d 0%, #11998e 100%);
 	border: none;
 	color: #fff;
@@ -445,11 +414,18 @@ a.bg-danger:hover {
 	margin: 0px;
 	padding: 20px;
 	height: 80px;
-	color: #999;
+	color: #4a4a4a;
 	font-weight: 300;
 	background: #fff;
 	border-top-right-radius: 4px;
 	border-bottom-right-radius: 4px;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+	transition: all 0.3s ease;
+}
+
+.widget-right:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
 
 @media (max-width: 768px) {
@@ -519,6 +495,7 @@ a.bg-danger:hover {
 .nav-tabs li.active a:hover {
 	border: 0;
 	padding: 15px 20px;
+	transition: all 0.3s ease;
 }
 
 .nav-pills {
@@ -536,7 +513,8 @@ a.bg-danger:hover {
 
 .nav-pills li.active a,
 .nav-pills li.active a:hover {
-	background: #30a5ff;
+	background: linear-gradient(90deg, #ffb53e 0%, #fc4a1a 100%);
+	box-shadow: 0 2px 5px rgba(252, 74, 26, 0.2);
 }
 
 .tab-content {
@@ -697,16 +675,36 @@ a.bg-danger:hover {
 /*Breadcrumbs*/
 
 .breadcrumb {
-	border-radius: 0;
-	padding: 10px 15px;
-	background: #e9ecf2;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
-	margin: 0 ;
+	border-radius: 4px;
+	padding: 12px 15px;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+	margin: 0;
+	border: 1px solid rgba(0,0,0,0.05);
+}
+
+.breadcrumb > li + li:before {
+	color: #ffb53e;
 }
 
 h1.page-header {
 	margin-top: 30px;
 	border-bottom: 0;
+	color: #4a4a4a;
+	font-weight: 600;
+	position: relative;
+	padding-bottom: 10px;
+}
+
+h1.page-header:after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 50px;
+	height: 3px;
+	background: linear-gradient(90deg, #ffb53e 0%, #fc4a1a 100%);
+	border-radius: 2px;
 }
 
 /*Charts*/
@@ -719,6 +717,15 @@ h1.page-header {
 	text-align: center;
 	padding: 1px 0;
 	margin-bottom: 20px;
+	background: #fff;
+	border-radius: 4px;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+	transition: all 0.3s ease;
+}
+
+.easypiechart-panel:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
 
 .placeholder h2 {

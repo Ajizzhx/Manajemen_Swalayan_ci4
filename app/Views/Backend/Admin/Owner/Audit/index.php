@@ -22,13 +22,19 @@
                 <div class="panel-heading">Daftar Log Audit</div>
                 <div class="panel-body">
                     <div class="row" style="margin-bottom: 10px;">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <form action="<?= site_url('admin/owner-area/audit-log') ?>" method="get" class="form-inline">
-                                <div class="form-group">
+                                <div class="form-group" style="margin-right: 10px;">
                                     <input type="text" name="keyword" class="form-control" placeholder="Cari aksi/deskripsi/pengguna..." value="<?= esc($keyword ?? '') ?>">
                                 </div>
+                                <div class="form-group" style="margin-right: 10px;">
+                                    <input type="date" name="start_date" class="form-control" placeholder="Tanggal Awal" value="<?= esc($start_date ?? '') ?>">
+                                </div>
+                                <div class="form-group" style="margin-right: 10px;">
+                                    <input type="date" name="end_date" class="form-control" placeholder="Tanggal Akhir" value="<?= esc($end_date ?? '') ?>">
+                                </div>
                                 <button type="submit" class="btn btn-primary">Cari</button>
-                                <?php if (!empty($keyword)): ?>
+                                <?php if (!empty($keyword) || !empty($start_date) || !empty($end_date)): ?>
                                     <a href="<?= site_url('admin/owner-area/audit-log') ?>" class="btn btn-default">Reset</a>
                                 <?php endif; ?>
                             </form>

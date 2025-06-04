@@ -28,13 +28,15 @@ class AuditController extends BaseController
 
         $data['title'] = 'Log Audit Sistem';
 
-      
         $builder = $this->auditLogModel
             ->select('audit_logs.*, karyawan.nama as nama_pengguna') 
             ->join('karyawan', 'karyawan.karyawan_id = audit_logs.user_id', 'left'); 
 
-        // Filter (Contoh, bisa Anda kembangkan)
+        // Filter keyword
         $keyword = $this->request->getGet('keyword');
+        $start_date = $this->request->getGet('start_date');
+        $end_date = $this->request->getGet('end_date');
+
         if ($keyword) {
             $builder->groupStart()
                     ->like('audit_logs.action', $keyword)
@@ -43,9 +45,21 @@ class AuditController extends BaseController
                     ->groupEnd();
         }
 
+        // Filter tanggal
+        if ($start_date && $end_date) {
+            $builder->where('DATE(audit_logs.created_at) >=', $start_date)
+                   ->where('DATE(audit_logs.created_at) <=', $end_date);
+        } elseif ($start_date) {
+            $builder->where('DATE(audit_logs.created_at) >=', $start_date);
+        } elseif ($end_date) {
+            $builder->where('DATE(audit_logs.created_at) <=', $end_date);
+        }
+
         $data['audit_logs'] = $builder->orderBy('audit_logs.created_at', 'DESC')->paginate($itemsPerPage);
         $data['pager'] = $this->auditLogModel->pager;
-        $data['keyword'] = $keyword; 
+        $data['keyword'] = $keyword;
+        $data['start_date'] = $start_date;
+        $data['end_date'] = $end_date;
 
         return view('Backend/Admin/Owner/Audit/index', $data); 
     }
