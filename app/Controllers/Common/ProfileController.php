@@ -80,14 +80,14 @@ class ProfileController extends BaseController
         ];
 
         if ($this->request->getPost('password')) {
-            // Password akan di-hash oleh KaryawanModel via beforeUpdate hook
+            
             $dataUpdate['password'] = $this->request->getPost('password');
         }
         
         if ($this->karyawanModel->update($karyawan_id, $dataUpdate)) {
-            // Update session data
+            
             $this->session->set('nama_karyawan', $dataUpdate['nama']);
-            $this->session->set('email', $dataUpdate['email']); // Jika email disimpan di sesi
+            $this->session->set('email', $dataUpdate['email']); 
 
             session()->setFlashdata('message', 'Profil berhasil diperbarui.');
         } else {

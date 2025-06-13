@@ -35,7 +35,7 @@ class PelangganController extends BaseController
     {
         $data = [
             'title'      => 'Tambah Member Baru',
-            'validation' => $this->validation,
+            'validation' => session()->getFlashdata('validation') ?? $this->validation, 
         ];
         return view('Backend/Admin/Pelanggan/create', $data);
     }
@@ -52,12 +52,12 @@ class PelangganController extends BaseController
         $data = [
             'pelanggan_id' => $pelanggan_id, // Simpan ID yang di-generate
             'nama'          => $this->request->getPost('nama'),
-            'no_ktp'        => $this->request->getPost('no_ktp'), // Simpan no_ktp
+            'no_ktp'        => $this->request->getPost('no_ktp'), 
             'email'         => $this->request->getPost('email'),
             'telepon'       => $this->request->getPost('telepon'),
             'alamat'        => $this->request->getPost('alamat'),
             'diskon_persen' => (float)($this->request->getPost('diskon_persen') ?? 1.00),
-            'poin'          => (int)($this->request->getPost('poin') ?? 0), // Tambahkan poin
+            'poin'          => (int)($this->request->getPost('poin') ?? 0), 
             'is_deleted'    => 0
         ];
 
@@ -87,26 +87,37 @@ class PelangganController extends BaseController
         $data = [
             'title'      => 'Edit Member',
             'pelanggan'  => $pelanggan,
-            'validation' => $this->validation,
+            'validation' => session()->getFlashdata('validation') ?? $this->validation, 
         ];
         return view('Backend/Admin/Pelanggan/edit', $data);
     }
 
     public function update($id)
     {
-        $pelanggan = $this->pelangganModel->where('is_deleted', 0)->find($id);
+        $pelanggan = $this->pelangganModel->find($id);
         if (!$pelanggan) {
             session()->setFlashdata('error', 'Member tidak ditemukan.');
             return redirect()->to('/admin/pelanggan');
         }
 
-        // Cek perubahan data sebelum validasi unik
+        // Debug log untuk tracking perubahan no_ktp
+        log_message('debug', '[PelangganController::update] ID: ' . $id . ', Old KTP: ' . $pelanggan->no_ktp . ', New KTP: ' . $this->request->getPost('no_ktp'));        // Cek perubahan data sebelum validasi unik
+        $no_ktp = trim($this->request->getPost('no_ktp'));
+          // Validate KTP format
+        if (strlen($no_ktp) !== 16) {
+            session()->setFlashdata('error', 'No KTP harus terdiri dari 16 digit (saat ini: ' . strlen($no_ktp) . ' digit)');
+            return redirect()->back()->withInput();
+        }
+        if (!ctype_digit($no_ktp)) {
+            session()->setFlashdata('error', 'No KTP hanya boleh berisi angka');
+            return redirect()->back()->withInput();
+        }
         $updateData = [
-            'nama'          => $this->request->getPost('nama'),
-            'alamat'        => $this->request->getPost('alamat'),
+            'nama'          => trim($this->request->getPost('nama')),
+            'alamat'        => trim($this->request->getPost('alamat')),
             'diskon_persen' => (float)($this->request->getPost('diskon_persen') ?? 0.00), 
             'poin'          => (int)($this->request->getPost('poin') ?? $pelanggan->poin ?? 0),
-            'no_ktp'        => $this->request->getPost('no_ktp'),
+            'no_ktp'        => $no_ktp,
         ];
         $submitted_email = trim((string)$this->request->getPost('email'));
         $original_email = trim((string)($pelanggan->email ?? ''));
@@ -117,24 +128,51 @@ class PelangganController extends BaseController
         $original_telepon = trim((string)($pelanggan->telepon ?? ''));
         if ($submitted_telepon !== $original_telepon) {
             $updateData['telepon'] = $submitted_telepon;
-        }
+        }        
+        log_message('debug', '[PelangganController::update] Comparing KTP - Current: ' . $pelanggan->no_ktp . ', New: ' . $updateData['no_ktp']);
+        
         $isDataChanged = ($updateData['nama'] !== $pelanggan->nama) ||
                          ($updateData['alamat'] !== $pelanggan->alamat) ||
                          ($updateData['diskon_persen'] != ($pelanggan->diskon_persen ?? 0.00)) || 
                          ($updateData['poin'] != ($pelanggan->poin ?? 0)) ||
                          (isset($updateData['email']) && $updateData['email'] !== $pelanggan->email) ||
                          (isset($updateData['telepon']) && $updateData['telepon'] !== $pelanggan->telepon) ||
-                         ($updateData['no_ktp'] !== $pelanggan->no_ktp);
+                         (strcmp($updateData['no_ktp'], $pelanggan->no_ktp) !== 0); // Use strcmp for string comparison
 
-        if (!$isDataChanged) {
+        
+        $isPotentiallyUniqueFieldChanged = (isset($updateData['email']) && $updateData['email'] !== $pelanggan->email) ||
+                                         (isset($updateData['telepon']) && $updateData['telepon'] !== $pelanggan->telepon) ||
+                                         (strcmp($updateData['no_ktp'], $pelanggan->no_ktp) !== 0);
+
+        if (!$isDataChanged && !$isPotentiallyUniqueFieldChanged) {
             session()->setFlashdata('message', 'Tidak ada perubahan data.');
             return redirect()->to('/admin/pelanggan');
-        }
-
-        $rules = $this->pelangganModel->getValidationRules();
-        $rules['email']   = str_replace('{id}', $id, $rules['email'] ?? 'permit_empty|valid_email|max_length[100]');
-        $rules['telepon'] = str_replace('{id}', $id, $rules['telepon'] ?? 'permit_empty|max_length[20]');
-        $rules['no_ktp']  = str_replace('{id}', $id, $rules['no_ktp'] ?? 'required|numeric|min_length[8]|max_length[32]|is_unique[pelanggan.no_ktp,pelanggan_id,{id}]');
+        }        $rules = $this->pelangganModel->getValidationRules();
+        
+        $rules['email'] = [
+            'rules' => 'required|valid_email|is_unique[pelanggan.email,pelanggan_id,'.$id.']',
+            'errors' => [
+                'required' => 'Email harus diisi.',
+                'valid_email' => 'Format email tidak valid.',
+                'is_unique' => 'Email sudah digunakan member lain.'
+            ]
+        ];
+        $rules['telepon'] = [
+            'rules' => 'permit_empty|numeric|max_length[20]|is_unique[pelanggan.telepon,pelanggan_id,'.$id.']',
+            'errors' => [
+                'numeric' => 'Nomor telepon hanya boleh berisi angka.',
+                'is_unique' => 'Nomor telepon sudah digunakan member lain.'
+            ]
+        ];        $rules['no_ktp'] = [
+            'rules' => 'required|numeric|exact_length[16]|is_unique[pelanggan.no_ktp,pelanggan_id,'.$id.']',
+            'errors' => [
+                'required' => 'No KTP wajib diisi.',
+                'numeric' => 'No KTP hanya boleh berisi angka.',
+                'exact_length' => 'No KTP harus terdiri dari 16 digit (masukkan semua 16 angka tanpa spasi atau karakter lain)',
+                'is_unique' => 'No KTP sudah digunakan member lain.'
+            ]
+        ];
+        
 
         if (!$this->validate($rules)) {
             $validation = $this->validator;
@@ -155,9 +193,11 @@ class PelangganController extends BaseController
                 session()->setFlashdata('error', $errorMsgTelepon);
             }
             return redirect()->back()->withInput()->with('validation', $validation);
-        }
-
+        }        
+        log_message('debug', '[PelangganController::update] Attempting to update with data: ' . json_encode($updateData));
+        
         if ($this->pelangganModel->update($id, $updateData)) {
+            log_message('debug', '[PelangganController::update] Update successful');
             // Log Audit
             $this->auditLogModel = new AuditLogModel();
             $this->auditLogModel->insert([
@@ -167,9 +207,10 @@ class PelangganController extends BaseController
             ]);
 
             session()->setFlashdata('message', 'Data member berhasil diperbarui.');
-            return redirect()->to('/admin/pelanggan');
-        } else {
+            return redirect()->to('/admin/pelanggan');        } else {
             $modelErrors = $this->pelangganModel->errors();
+            log_message('error', '[PelangganController::update] Update failed. Model errors: ' . json_encode($modelErrors));
+            log_message('error', '[PelangganController::update] Last query: ' . $this->pelangganModel->db->getLastQuery());
             session()->setFlashdata('error', 'Gagal memperbarui data member. ' . (!empty($modelErrors) ? implode(' ', array_values($modelErrors)) : 'Periksa kembali data yang Anda masukkan.'));
             return redirect()->back()->withInput()->with('validation', $this->pelangganModel->validator); 
         }

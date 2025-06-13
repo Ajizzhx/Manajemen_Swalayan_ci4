@@ -125,7 +125,9 @@
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					Selamat Datang, <?= esc(session()->get('nama') ?? 'Pengguna') ?>!
-					(<?= esc(ucfirst(session()->get('role'))) ?>)
+					<?php if (session()->get('role') === 'admin' || session()->get('role') === 'pemilik'): ?>
+						(<?= esc(ucfirst(session()->get('role'))) ?>)
+					<?php endif; ?>
 				</div>
 				<div class="panel-body">
 					<?php if (session()->get('role') === 'pemilik'): ?>

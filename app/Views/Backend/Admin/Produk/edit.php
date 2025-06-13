@@ -111,7 +111,7 @@ $(document).ready(function() {
         $('#kode_barcode').val(decodedText).focus(); 
         
         try {
-            const audio = new Audio("<?= base_url('assets/sounds/success-scan.mp3') ?>"); // Pastikan file ini ada
+            const audio = new Audio("<?= base_url('assets/sounds/success-scan.mp3') ?>"); 
             audio.play().catch(e => console.error("Error playing sound:", e));
         } catch (e) {
             console.error("Error initializing audio:", e);

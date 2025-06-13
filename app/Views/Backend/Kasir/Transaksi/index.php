@@ -149,14 +149,15 @@
                         <h4 class="modal-title" id="modalTambahPelangganLabel">Tambah Member Baru</h4>
                     </div>
                     <div class="modal-body">
-                        <div id="pelanggan_form_error" class="alert alert-danger" style="display:none;"></div>
-                        <div class="form-group">
+                        <div id="pelanggan_form_error" class="alert alert-danger" style="display:none;"></div>                        <div class="form-group">
                             <label for="no_ktp_pelanggan">No KTP <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="no_ktp_pelanggan" name="no_ktp_pelanggan" required pattern="[0-9]{8,32}" maxlength="32" minlength="8" title="Masukkan No KTP (8-32 digit angka, unik)">
+                            <input type="text" class="form-control" id="no_ktp_pelanggan" name="no_ktp_pelanggan" required pattern="[0-9]{16}" maxlength="16" minlength="16" title="Masukkan No KTP (16 digit angka, tanpa spasi atau karakter lain)">
                         </div>
                         <div class="form-group">
                             <label for="nama_pelanggan">Nama Member <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nama_pelanggan" name="nama_pelanggan" required>
+                            <div id="error_nama_pelanggan" class="text-danger" style="font-size: 12px; display:none;"></div>
+                            
                         </div>
                         <div class="form-group">
                             <label for="email_pelanggan">Email</label>
@@ -513,6 +514,10 @@ $(document).ready(function() {
             dataType: "json",
             success: function(response) {
                 if (response.csrf_hash) updateGlobalCsrfToken(response.csrf_hash);
+                
+                $('#error_nama_pelanggan').hide().text('');
+                
+
                 if (response.success) {
                     alert(response.message);
                     $('#modalTambahPelanggan').modal('hide');
@@ -535,9 +540,15 @@ $(document).ready(function() {
                 } else {
                     let errorMessages = '<ul>';
                     if (response.errors && typeof response.errors === 'object') {
+                        
+                        if (response.errors.nama_pelanggan) {
+                            $('#error_nama_pelanggan').text(esc_html(response.errors.nama_pelanggan)).show();
+                        }
+                        
+
                         $.each(response.errors, function(key, value) {
                             errorMessages += '<li>' + esc_html(value) + '</li>';
-                        });
+                        });                        
                     } else if (response.message) {
                         errorMessages += '<li>' + esc_html(response.message) + '</li>';
                     } else {
@@ -567,7 +578,7 @@ $(document).ready(function() {
             fetchProductByBarcodeAndAddToCart(decodedText);
             
             try {
-                const audio = new Audio("<?= base_url('assets/sounds/success-scan.mp3') ?>"); // Pastikan file ini ada
+                const audio = new Audio("<?= base_url('assets/sounds/success-scan.mp3') ?>"); 
                 audio.play().catch(e => console.error("Error playing sound:", e));
             } catch (e) {
                 console.error("Error initializing audio:", e);
@@ -758,7 +769,7 @@ $(document).ready(function() {
         cartTableBody.empty();
         let subtotalKotor = 0; 
         
-        // Reset and reapply uang bayar based on payment method when cart changes
+       
         const metodePembayaran = $('#metode_pembayaran').val();
         if (metodePembayaran !== 'tunai') {
             const event = new Event('change', { bubbles: true });
@@ -972,7 +983,7 @@ $(document).ready(function() {
                     $('#detail_total_belanja_modal').text(formatCurrency(transactionData.total_harga));
 
                     $('#detail_uang_bayar_modal').text(formatCurrency(transactionData.uang_bayar));
-                    // Tampilkan poin diperoleh di modal
+                   
                     if (response.poin_diperoleh && response.poin_diperoleh > 0) {
                         $('#detail_poin_diperoleh_modal').text(response.poin_diperoleh + ' Poin');
                         $('#detail_poin_diperoleh_modal_row').show();
@@ -1092,7 +1103,7 @@ $(document).ready(function() {
         $('#search_pelanggan').val('').show();
         $('#selected_pelanggan_id').val('');
         $('#selected_pelanggan_info').hide();
-        $('#uang_bayar_display').val(''); // Kosongkan juga field display
+        $('#uang_bayar_display').val(''); 
         $('#uang_bayar').val('');
         $('#metode_pembayaran').val('tunai'); 
         currentPelangganPoin = 0; 

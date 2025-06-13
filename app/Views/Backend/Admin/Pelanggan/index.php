@@ -28,17 +28,16 @@
                     <?php endif; ?>
                     <?php if (session()->getFlashdata('error')): ?>
                         <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
-                    <?php endif; ?>
-
-                    <table data-toggle="table" data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-search="true" data-pagination="true" data-sort-name="no" data-sort-order="asc">
+                    <?php endif; ?>                    <table data-toggle="table" data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-search="true" data-pagination="true" data-sort-name="no" data-sort-order="asc">
                         <thead>
                         <tr>
                             <th data-field="no" data-sortable="false">No</th>
+                            <th data-field="no_ktp" data-sortable="true">No KTP</th>
                             <th data-field="nama" data-sortable="true">Nama Member</th>
                             <th data-field="email" data-sortable="true">Email</th>
                             <th data-field="telepon" data-sortable="true">Telepon</th>
                             <th data-field="alamat" data-sortable="true">Alamat</th>
-                        <th data-field="poin" data-sortable="true">Poin</th>
+                            <th data-field="poin" data-sortable="true">Poin</th>
                             <th data-field="actions">Aksi</th>
                         </tr>
                         </thead>
@@ -46,11 +45,12 @@
                             <?php $no = 1; foreach ($pelanggan as $p): ?>
                             <tr>
                                 <td><?= $no++ ?></td>
+                                <td><?= esc($p->no_ktp) ?></td>
                                 <td><?= esc($p->nama) ?></td>
                                 <td><?= esc($p->email ?: '-') ?></td>
                                 <td><?= esc($p->telepon ?: '-') ?></td>
                                 <td><?= esc($p->alamat ?: '-') ?></td>
-                            <td><?= esc($p->poin ?? 0) ?></td> 
+                                <td><?= esc($p->poin ?? 0) ?></td>
                                 <td>
                                     <a href="<?= site_url('/admin/pelanggan/edit/' . $p->pelanggan_id) ?>" class="btn btn-warning btn-xs">
                                         <span class="glyphicon glyphicon-edit"></span> Edit

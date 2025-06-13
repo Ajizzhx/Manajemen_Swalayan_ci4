@@ -9,7 +9,95 @@ class Auth extends BaseController
 {
     protected $session;
     protected $karyawanModel;
-    protected $auditLogModel;
+    protected $auditLogModel;    protected function sendOTPEmail($email, $otp, $karyawanId) {
+        $emailService = \Config\Services::email();
+        log_message('info', 'Attempting to send OTP email to: ' . $email);
+        
+        try {
+            // Initialize email service with explicit configuration
+            $emailConfig = config('Email');
+            $emailService->initialize([
+                'protocol' => 'smtp',
+                'SMTPHost' => 'smtp.gmail.com',
+                'SMTPUser' => $emailConfig->SMTPUser,
+                'SMTPPass' => $emailConfig->SMTPPass,
+                'SMTPPort' => 465,
+                'SMTPCrypto' => 'ssl',
+                'mailType' => 'html',
+                'charset' => 'utf-8',
+                'validate' => true,
+                'SMTPTimeout' => 30,
+                'SMTPKeepAlive' => false,
+                'newline' => "\r\n",
+                'SMTPDebug' => 2
+            ]);
+            
+            log_message('info', 'Email configuration initialized');
+            
+            $emailService->setFrom($emailConfig->fromEmail, 'Swalayan 2FA')
+                ->setTo($email)
+                ->setSubject('Kode OTP Login Owner Swalayan')
+                ->setMessage('
+                    <html>
+                        <body>
+                            <h2>Kode OTP Login Owner Swalayan</h2>
+                            <p>Kode OTP Anda: <strong style="font-size: 24px;">' . $otp . '</strong></p>
+                            <p>Kode berlaku selama 5 menit.</p>
+                            <p>Jika Anda tidak merasa melakukan permintaan ini, abaikan email ini.</p>
+                        </body>
+                    </html>
+                ');            // Clear any previous errors
+            error_clear_last();
+            
+            // Enable error reporting for this section
+            $old_error_reporting = error_reporting(E_ALL);
+            
+            $result = $emailService->send(false);
+            
+            // Restore error reporting
+            error_reporting($old_error_reporting);
+            
+            if (!$result) {
+                $error = error_get_last();
+                $debug = $emailService->printDebugger(['headers', 'subject', 'body']);
+                $errorMsg = $error ? $error['message'] : 'Unknown error';
+                
+                log_message('error', 'Failed to send OTP email. Error: ' . $errorMsg);
+                log_message('error', 'SMTP Debug: ' . $debug);
+                
+                $this->logEmailError($email, $errorMsg . "\nDebug: " . $debug);
+                return false;
+            }
+            
+            log_message('info', 'Successfully sent OTP email to: ' . $email);
+            
+            // Log success
+            $auditLogModel = new AuditLogModel();
+            $auditLogModel->insert([
+                'user_id' => $karyawanId,
+                'action' => 'LOGIN_2FA_OTP_SENT',
+                'description' => 'OTP dikirim ke email owner: ' . $email,
+                'ip_address' => $this->request->getIPAddress(),
+                'user_agent' => $this->request->getUserAgent()->getAgentString(),
+            ]);
+            return true;
+        } catch (\Exception $e) {
+            log_message('error', 'Exception while sending OTP email: ' . $e->getMessage());
+            $this->logEmailError($email, $e->getMessage());
+            return false;
+        }
+    }
+
+    protected function logEmailError($email, $error) {
+        log_message('error', 'Failed to send OTP email to ' . $email . '. Error: ' . $error);
+        $auditLogModel = new AuditLogModel();
+        $auditLogModel->insert([
+            'action' => 'EMAIL_SEND_FAILED',
+            'description' => 'Failed to send OTP email to ' . $email . '. Error: ' . $error,
+            'ip_address' => $this->request->getIPAddress(),
+            'user_agent' => $this->request->getUserAgent()->getAgentString(),
+        ]);
+    }
 
     public function __construct()
     {
@@ -20,13 +108,14 @@ class Auth extends BaseController
 
     public function index()
     {
-        
-        if ($this->session->get('isLoggedIn')) {
+          if ($this->session->get('isLoggedIn')) {
             if ($this->session->get('role') == 'admin') {
                 return redirect()->to('/admin/dashboard');
             } elseif ($this->session->get('role') == 'kasir') {
                 return redirect()->to('/kasir/dashboard');
-                } elseif ($this->session->get('role') == 'pemilik') {
+            } elseif ($this->session->get('role') == 'kepala_toko') {
+                return redirect()->to('/admin/dashboard');
+            } elseif ($this->session->get('role') == 'pemilik') {
                 return redirect()->to('/admin/dashboard'); 
             }
         }
@@ -34,29 +123,28 @@ class Auth extends BaseController
     }
     public function loginKasir()
     {
-        
-        if ($this->session->get('isLoggedIn')) {
+          if ($this->session->get('isLoggedIn')) {
             if ($this->session->get('role') == 'admin') {
-                
                 return redirect()->to('/admin/dashboard');
             } elseif ($this->session->get('role') == 'kasir') {
                 return redirect()->to('/kasir/dashboard'); 
-                } elseif ($this->session->get('role') == 'pemilik') { 
-                return redirect()->to('/admin/dashboard'); 
-
+            } elseif ($this->session->get('role') == 'kepala_toko') {
+                return redirect()->to('/admin/dashboard');
+            } elseif ($this->session->get('role') == 'pemilik') { 
+                return redirect()->to('/admin/dashboard');
             }
         }
         return view('Backend/Login/kasir_login'); 
     }
     public function loginAdmin()
     {
-        
-        if ($this->session->get('isLoggedIn')) {
+          if ($this->session->get('isLoggedIn')) {
             if ($this->session->get('role') == 'admin') {
                 return redirect()->to('/admin/dashboard');
             } elseif ($this->session->get('role') == 'kasir') {
-                
                 return redirect()->to('/kasir/dashboard');
+            } elseif ($this->session->get('role') == 'kepala_toko') {
+                return redirect()->to('/admin/dashboard');
             } elseif ($this->session->get('role') == 'pemilik') { 
                 return redirect()->to('/admin/dashboard');
             }
@@ -98,6 +186,9 @@ class Auth extends BaseController
                     'role'        => $karyawan['role'],
                     'isLoggedIn'  => TRUE
                 ];
+                // Update last_login
+                $this->karyawanModel->update($karyawan['karyawan_id'], ['last_login' => date('Y-m-d H:i:s')]);
+
                 // Jika role pemilik, lakukan 2FA OTP
                 if ($karyawan['role'] == 'pemilik') {
                     // Generate OTP 6 digit
@@ -110,21 +201,9 @@ class Auth extends BaseController
                     ];
                     $this->session->set('2fa_karyawan_data', $otpData);
                     // Kirim OTP ke email
-                    $emailService = \Config\Services::email();
-                    $emailService->setFrom('no-reply@swalayan.com', 'Swalayan 2FA');
-                    $emailService->setTo($karyawan['email']);
-                    $emailService->setSubject('Kode OTP Login Owner Swalayan');
-                    $emailService->setMessage('Kode OTP Anda: <b>' . $otp . '</b>\nKode berlaku 5 menit.');
-                    $emailService->send();
-                    // Simpan audit log
-                    $auditLogModel = new AuditLogModel();
-                    $auditLogModel->insert([
-                        'user_id' => $karyawan['karyawan_id'],
-                        'action' => 'LOGIN_2FA_OTP_SENT',
-                        'description' => 'OTP dikirim ke email owner: ' . $karyawan['email'],
-                        'ip_address' => $this->request->getIPAddress(),
-                        'user_agent' => $this->request->getUserAgent()->getAgentString(),
-                    ]);
+                    if (!$this->sendOTPEmail($karyawan['email'], $otp, $karyawan['karyawan_id'])) {
+                        return redirect()->back()->with('error', 'Gagal mengirim kode OTP. Silakan coba lagi.');
+                    }
                     // Redirect ke halaman verifikasi OTP
                     return redirect()->to(site_url('auth/verify-otp'));
                 }
@@ -136,12 +215,12 @@ class Auth extends BaseController
                      'description' => 'User ' . $karyawan['email'] . ' logged in successfully.',
                      'ip_address' => $this->request->getIPAddress(),
                      'user_agent' => $this->request->getUserAgent()->getAgentString(),
-                 ]);
-
-                if ($karyawan['role'] == 'admin') {
+                 ]);                if ($karyawan['role'] == 'admin') {
                     return redirect()->to('/admin/dashboard')->with('success', 'Login berhasil! Selamat datang, Admin.');
                 } elseif ($karyawan['role'] == 'kasir') {
                     return redirect()->to('/kasir/dashboard')->with('success', 'Login berhasil! Selamat datang, Kasir.');
+                } elseif ($karyawan['role'] == 'kepala_toko') {
+                    return redirect()->to('/admin/dashboard')->with('success', 'Login berhasil! Selamat datang, Kepala Toko.');
                 } elseif ($karyawan['role'] == 'pemilik') { 
                     return redirect()->to('/admin/dashboard')->with('success', 'Login berhasil! Selamat datang, Pemilik.');
                 } else {
@@ -266,12 +345,9 @@ class Auth extends BaseController
         $otpData['otp_expires'] = time() + 300;
         $this->session->set('2fa_karyawan_data', $otpData);
         // Kirim ulang OTP ke email
-        $emailService = \Config\Services::email();
-        $emailService->setFrom('no-reply@swalayan.com', 'Swalayan 2FA');
-        $emailService->setTo($otpData['email']);
-        $emailService->setSubject('Kode OTP Login Owner Swalayan');
-        $emailService->setMessage('Kode OTP Anda: <b>' . $otp . '</b>\nKode berlaku 5 menit.');
-        $emailService->send();
+        if (!$this->sendOTPEmail($otpData['email'], $otp, $otpData['karyawan_id'])) {
+            return redirect()->back()->with('error', 'Gagal mengirim ulang kode OTP ke email. Silakan coba lagi.');
+        }
         // Audit log
         $auditLogModel = new AuditLogModel();
         $auditLogModel->insert([
@@ -283,4 +359,6 @@ class Auth extends BaseController
         ]);
         return redirect()->back()->with('message', 'Kode OTP baru telah dikirim ke email Anda.');
     }
+
+    // ...existing code...
 }

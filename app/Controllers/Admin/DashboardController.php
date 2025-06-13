@@ -33,7 +33,7 @@ class DashboardController extends BaseController
     public function index()
     {
         $data['title'] = 'Dashboard';
-        $data['user_role'] = session()->get('role'); // Tambahkan peran pengguna ke data
+        $data['user_role'] = session()->get('role'); 
         $data['total_produk'] = $this->produkModel->where('is_deleted', 0)->countAllResults();
         $data['total_kategori'] = $this->kategoriModel->where('is_deleted', 0)->countAllResults();
         $data['total_karyawan'] = $this->karyawanModel->where('is_deleted', 0)->countAllResults(); 
@@ -65,7 +65,7 @@ class DashboardController extends BaseController
         if ($data['user_role'] === 'pemilik') {
             $data['transaksi_pending_approval_count'] = $this->transaksiModel
                 ->where('status_penghapusan', 'pending_approval')
-                ->where('is_deleted', 0) // Pastikan transaksi belum di-soft delete secara umum
+                ->where('is_deleted', 0) 
                 ->countAllResults();
         }
 

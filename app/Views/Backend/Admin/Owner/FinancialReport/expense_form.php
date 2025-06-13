@@ -57,13 +57,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (jumlahDisplay && jumlahHidden) {
         jumlahDisplay.addEventListener('input', function(e) {
             let value = e.target.value;
-            // Hapus semua karakter non-digit kecuali koma jika ingin mengizinkan desimal
+            
             let numericValue = value.replace(/[^0-9]/g, '');
 
-            // Simpan nilai numerik ke input hidden
+           
             jumlahHidden.value = numericValue;
 
-            // Format tampilan dengan titik sebagai pemisah ribuan
+            
             if (numericValue.length > 0) {
                 e.target.value = parseInt(numericValue, 10).toLocaleString('id-ID');
             } else {

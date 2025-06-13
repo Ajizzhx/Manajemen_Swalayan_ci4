@@ -4,17 +4,17 @@ namespace App\Controllers\Kasir;
 
 use App\Controllers\BaseController;
 use App\Models\ProdukModel;
-use App\Models\TransaksiModel; // Tambahkan TransaksiModel
+use App\Models\TransaksiModel; 
 
 class CekProdukController extends BaseController
 {
     protected $produkModel;
-    protected $transaksiModel; // Deklarasi TransaksiModel
+    protected $transaksiModel; 
 
     public function __construct()
     {
         $this->produkModel = new ProdukModel();
-        $this->transaksiModel = new TransaksiModel(); // Inisialisasi TransaksiModel
+        $this->transaksiModel = new TransaksiModel(); 
         
     }
 

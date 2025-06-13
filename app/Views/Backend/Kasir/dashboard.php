@@ -54,8 +54,7 @@
 	<div class="row">
 		<div class="col-lg-12">
 			<div class="panel panel-default">
-				<div class="panel-heading">
-					Selamat Datang, <?= esc(session()->get('nama_karyawan') ?? session()->get('nama') ?? 'Kasir') ?>!
+				<div class="panel-heading">					Selamat Datang, <?= esc(session()->get('nama') ?? 'Kasir') ?>!
 				</div>
 				<div class="panel-body">
 					<p>Ini adalah halaman dashboard utama untuk Kasir.</p>

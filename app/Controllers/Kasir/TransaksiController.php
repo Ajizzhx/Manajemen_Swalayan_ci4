@@ -41,7 +41,7 @@ class TransaksiController extends BaseController
     {
         $kasir_id = $this->session->get('karyawan_id');
         if (!$kasir_id) {
-            // Handle jika kasir_id tidak ada di session, mungkin redirect ke login
+            
             session()->setFlashdata('error', 'Sesi Anda tidak valid. Silakan login kembali.');
             return redirect()->to(site_url('login'));
         }
@@ -143,7 +143,7 @@ class TransaksiController extends BaseController
                         'telepon' => $p->telepon,
                         'alamat' => $p->alamat,
                         'diskon_persen' => $p->diskon_persen ?? 0.00, 
-                        'poin' => $p->poin ?? 0, // Tambahkan poin pelanggan
+                        'poin' => $p->poin ?? 0, 
                     ];
                 }
             }
@@ -176,13 +176,11 @@ class TransaksiController extends BaseController
 
        
         $rules = [
-            'no_ktp_pelanggan' => [
-                'rules' => 'required|numeric|min_length[8]|max_length[32]|is_unique[pelanggan.no_ktp]',
+            'no_ktp_pelanggan' => [                'rules' => 'required|numeric|exact_length[16]|is_unique[pelanggan.no_ktp]',
                 'errors' => [
                     'required' => 'No KTP wajib diisi.',
                     'numeric' => 'No KTP hanya boleh berisi angka.',
-                    'min_length' => 'No KTP minimal 8 digit.',
-                    'max_length' => 'No KTP maksimal 32 digit.',
+                    'exact_length' => 'No KTP harus terdiri dari 16 digit (masukkan semua 16 angka tanpa spasi atau karakter lain)',
                     'is_unique' => 'No KTP sudah digunakan oleh member lain.'
                 ]
             ],
@@ -241,7 +239,7 @@ class TransaksiController extends BaseController
                             'nama' => $newPelanggan->nama,
                             'telepon' => $newPelanggan->telepon,
                             'diskon_persen' => $newPelanggan->diskon_persen ?? 0.00, 
-                            'poin' => $newPelanggan->poin ?? 0, // Sertakan poin
+                            'poin' => $newPelanggan->poin ?? 0, 
                         ];
                     }
                     return $this->response->setJSON([

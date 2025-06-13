@@ -38,6 +38,9 @@
                     <div class="form-group">
                         <label for="nama">Nama Karyawan</label>
                         <input type="text" class="form-control" id="nama" name="nama" value="<?= old('nama') ?>" required>
+                        <?php if ($validation->hasError('nama')): ?>
+                            <div class="text-danger" style="font-size: 12px;"><?= $validation->getError('nama') ?></div>
+                        <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
@@ -52,12 +55,12 @@
                             </span>
                         </div>
                         <small class="form-text text-muted">Minimal 6 karakter.</small>
-                    </div>
-                    <div class="form-group">
+                    </div>                    <div class="form-group">
                         <label for="role">Role</label>
                         <select class="form-control" id="role" name="role" required>
                             <option value="">Pilih Role</option>
                             <option value="admin" <?= old('role') == 'admin' ? 'selected' : '' ?>>Admin</option>
+                            <option value="kepala_toko" <?= old('role') == 'kepala_toko' ? 'selected' : '' ?>>Kepala Toko</option>
                             <option value="kasir" <?= old('role') == 'kasir' ? 'selected' : '' ?>>Kasir</option>
                         </select>
                     </div>

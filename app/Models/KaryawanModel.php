@@ -10,8 +10,8 @@ class KaryawanModel extends Model
     protected $primaryKey       = 'karyawan_id';
     protected $useAutoIncrement = false; 
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false; 
-    protected $allowedFields    = ['karyawan_id', 'nama', 'email', 'password', 'role', 'is_deleted'];
+    protected $useSoftDeletes   = false;
+    protected $allowedFields    = ['karyawan_id', 'nama', 'email', 'password', 'role', 'is_deleted', 'last_login', 'last_activity'];
 
     // Dates
     protected $useTimestamps = true;

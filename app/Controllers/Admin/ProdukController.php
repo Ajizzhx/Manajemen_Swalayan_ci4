@@ -48,8 +48,8 @@ class ProdukController extends BaseController
     {
         $data = [
             'title' => 'Tambah Produk Baru',
-            'kategori' => $this->kategoriModel->withDeleted()->where('is_deleted', 0)->findAll(), // Ambil semua kategori aktif
-            'supplier' => $this->supplierModel->withDeleted()->where('is_deleted', 0)->findAll(), // Ambil semua supplier aktif
+            'kategori' => $this->kategoriModel->withDeleted()->where('is_deleted', 0)->findAll(), 
+            'supplier' => $this->supplierModel->withDeleted()->where('is_deleted', 0)->findAll(),
             'validation' => \Config\Services::validation()
         ];
         return view('Backend/Admin/Produk/create', $data);
@@ -63,7 +63,7 @@ class ProdukController extends BaseController
             'harga'         => 'required|numeric|greater_than[0]',
             'stok'          => 'required|integer|greater_than_equal_to[0]',
             'kategori_id'   => 'required|is_not_unique[kategori.kategori_id]',
-            'supplier_id'   => 'permit_empty|is_not_unique[supplier.supplier_id]' // Supplier bisa opsional
+            'supplier_id'   => 'permit_empty|is_not_unique[supplier.supplier_id]' 
         ];
 
         if (!$this->validate($rules)) {
@@ -80,7 +80,7 @@ class ProdukController extends BaseController
             'harga'         => $this->request->getPost('harga'),
             'stok'          => $this->request->getPost('stok'),
             'kategori_id'   => $this->request->getPost('kategori_id'),
-            'supplier_id'   => $this->request->getPost('supplier_id') ?: null, // Simpan null jika kosong
+            'supplier_id'   => $this->request->getPost('supplier_id') ?: null, 
             'is_deleted'    => 0
         ]);
 
@@ -175,7 +175,7 @@ class ProdukController extends BaseController
         $this->produkModel->update($id, ['is_deleted' => 1]);
 
         // Log Audit
-        $this->auditLogModel = new AuditLogModel(); // Re-instantiate if needed, or move to constructor
+        $this->auditLogModel = new AuditLogModel(); 
         $this->auditLogModel->insert([
             'user_id' => session()->get('karyawan_id'),
             'action' => 'DELETE_PRODUK',

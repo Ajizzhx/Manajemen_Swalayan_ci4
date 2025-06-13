@@ -15,6 +15,12 @@ class RoleGuard implements FilterInterface
         
         if (!$session->get('isLoggedIn')) {
             return redirect()->to(site_url('login'))->with('error', 'Anda harus login terlebih dahulu.');
+        } else {
+            // Update last_activity jika user sudah login
+            $karyawanModel = new \App\Models\KaryawanModel();
+            if ($session->has('karyawan_id')) {
+                $karyawanModel->update($session->get('karyawan_id'), ['last_activity' => date('Y-m-d H:i:s')]);
+            }
         }
 
         

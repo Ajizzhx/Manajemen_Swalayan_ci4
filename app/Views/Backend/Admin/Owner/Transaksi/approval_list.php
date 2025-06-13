@@ -166,13 +166,13 @@
     $('#formRejectRequest').on('submit', function(e) {
         var alasan = $('#alasan_penolakan_owner').val().trim();
         if (alasan === '') {
-            e.preventDefault(); // Hentikan submit form
-            $('#alasan_penolakan_owner').addClass('is-invalid'); // Jika Anda menggunakan Bootstrap untuk styling error
+            e.preventDefault(); 
+            $('#alasan_penolakan_owner').addClass('is-invalid');
             $('.invalid-feedback').show();
         } else {
             $('#alasan_penolakan_owner').removeClass('is-invalid');
             $('.invalid-feedback').hide();
-            // Tambahkan konfirmasi sebelum submit jika diinginkan
+           
             if(!confirm('Anda yakin ingin menolak permintaan penghapusan transaksi ini? Stok akan disesuaikan kembali.')) {
                 e.preventDefault();
             }

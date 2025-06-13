@@ -12,7 +12,7 @@ class PelangganModel extends Model
     protected $returnType       = 'object'; 
     protected $useSoftDeletes   = false; 
     protected $allowedFields    = [
-        'pelanggan_id', 'nama', 'email', 'telepon', 'alamat', 'diskon_persen', 'is_deleted', 'poin', 'no_ktp' // Tambahkan no_ktp ke allowedFields
+        'pelanggan_id', 'nama', 'email', 'telepon', 'alamat', 'diskon_persen', 'is_deleted', 'poin', 'no_ktp' 
     ];
 
     // Dates
@@ -23,9 +23,9 @@ class PelangganModel extends Model
     
     // Validation
     protected $validationRules      = [
-        'nama' => 'required|min_length[3]|max_length[100]',
+        'nama' => 'required|alpha_space|min_length[3]|max_length[100]',
         'email' => 'required|valid_email|max_length[100]|is_unique[pelanggan.email,pelanggan_id,{id}]',
-        'no_ktp' => 'required|numeric|min_length[8]|max_length[32]|is_unique[pelanggan.no_ktp,pelanggan_id,{id}]', // Validasi no_ktp wajib, angka, unik
+        'no_ktp' => 'required|numeric|exact_length[16]|is_unique[pelanggan.no_ktp,pelanggan_id,{id}]', // KTP number must be exactly 16 digits
         'telepon' => 'permit_empty|numeric|max_length[20]|is_unique[pelanggan.telepon,pelanggan_id,{id}]',
         'alamat' => 'permit_empty|max_length[255]',
         'diskon_persen' => 'permit_empty|numeric|greater_than_equal_to[0]|less_than_equal_to[100]',
@@ -34,17 +34,17 @@ class PelangganModel extends Model
     protected $validationMessages   = [
         'nama' => [
             'required' => 'Nama pelanggan harus diisi.',
+            'alpha_space' => 'Nama pelanggan hanya boleh berisi karakter alfabet dan spasi.',
+            
         ],
         'email' => [
             'required' => 'Email pelanggan harus diisi.',
             'is_unique' => 'Email sudah terdaftar.',
-        ],
-        'no_ktp' => [
+        ],        'no_ktp' => [
             'required' => 'No KTP wajib diisi.',
             'numeric' => 'No KTP hanya boleh berisi angka.',
             'is_unique' => 'No KTP sudah terdaftar sebagai member lain.',
-            'min_length' => 'No KTP minimal 8 digit.',
-            'max_length' => 'No KTP maksimal 32 digit.'
+            'exact_length' => 'No KTP harus terdiri dari 16 digit (masukkan semua 16 angka tanpa spasi atau karakter lain).'
         ],
         'telepon' => [
             'is_unique' => 'Nomor telepon sudah terdaftar.',

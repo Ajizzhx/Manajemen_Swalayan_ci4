@@ -19,9 +19,20 @@ $routes->post('auth/process-otp', 'Auth::processOtp');
 $routes->get('auth/resend-otp', 'Auth::resendOtp');
 
 // --- ADMIN & PEMILIK GROUP ---
-$routes->group('admin', ['filter' => 'roleGuard:admin,pemilik', 'namespace' => 'App\Controllers\Admin'], static function ($routes) {
+$routes->group('admin', ['filter' => 'roleGuard:admin,pemilik,kepala_toko', 'namespace' => 'App\Controllers\Admin'], static function ($routes) {
     $routes->get('/', 'DashboardController::index', ['as' => 'admin.dashboard.index']); // Mengarahkan /admin ke dashboard
     $routes->get('dashboard', 'DashboardController::index', ['as' => 'admin.dashboard']);
+
+    // Rute Monitoring (Khusus Kepala Toko)
+    $routes->group('monitoring', function ($routes) {
+        $routes->get('stok', 'MonitoringController::stok', ['as' => 'admin.monitoring.stok', 'filter' => 'roleGuard:kepala_toko,admin']);
+        $routes->get('penjualan', 'MonitoringController::penjualan', ['as' => 'admin.monitoring.penjualan', 'filter' => 'roleGuard:kepala_toko,admin']);
+        $routes->get('kasir', 'MonitoringController::kasir', ['as' => 'admin.monitoring.kasir', 'filter' => 'roleGuard:kepala_toko,admin']);
+        
+        // API endpoints for realtime data
+        $routes->get('api/kasir-data', 'MonitoringController::getRealtimeKasirData', ['as' => 'admin.monitoring.api.kasir', 'filter' => 'roleGuard:kepala_toko,admin']);
+        $routes->get('api/sales-data', 'MonitoringController::getRealtimeSalesData', ['as' => 'admin.monitoring.api.sales', 'filter' => 'roleGuard:kepala_toko,admin']);
+    });
 
     // Rute CRUD Produk
     $routes->get('produk', 'ProdukController::index', ['as' => 'admin.produk.index']);
@@ -70,8 +81,8 @@ $routes->group('admin', ['filter' => 'roleGuard:admin,pemilik', 'namespace' => '
     $routes->post('profile/update', '\App\Controllers\Common\ProfileController::update', ['as' => 'admin.profile.update']);
 
     // --- PEMILIK SPECIFIC SUB-GROUP ---
-    $routes->group('owner-area', ['filter' => 'roleGuard:pemilik'], static function ($routes) { // Filter 'owneronly' juga bisa digunakan jika secara spesifik memeriksa 'pemilik'
-        $routes->get('dashboard', 'DashboardController::index', ['as' => 'owner.dashboard']); // Dashboard pemilik, bisa sama dengan admin atau berbeda
+    $routes->group('owner-area', ['filter' => 'roleGuard:pemilik'], static function ($routes) { 
+        $routes->get('dashboard', 'DashboardController::index', ['as' => 'owner.dashboard']); 
 
         // Audit Log
         $routes->get('audit-log', 'Owner\AuditController::index', ['as' => 'owner.auditlog']);

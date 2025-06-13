@@ -156,8 +156,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Helper function untuk format mata uang tanpa 'Rp ' untuk struk
-    function formatCurrencySimple(amount) { // Diubah untuk menyertakan Rp
+
+    function formatCurrencySimple(amount) { 
         return 'Rp ' + Number(amount).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
@@ -165,20 +165,20 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnCetakStruk) {
         btnCetakStruk.addEventListener('click', function() {
             <?php
-            // Siapkan data untuk struk dari variabel PHP
+            
             $struk_data = [
                 'kode_transaksi' => $transaksi['transaksi_id'], // Gunakan transaksi_id
-                // Untuk tanggal, kita ambil yang sudah diformat di PHP
+               
                 'tanggal_transaksi' => isset($tanggal_formatted) ? $tanggal_formatted : date('d M Y, H:i', strtotime($transaksi['created_at'])),
                 'nama_pelanggan' => $transaksi['nama_pelanggan'] ?? 'Umum',
                 'nama_kasir' => $transaksi['nama_kasir'] ?? 'N/A',
                 'metode_pembayaran' => ucwords(str_replace('_', ' ', $transaksi['metode_pembayaran'] ?? 'N/A')),
                 // Data untuk perhitungan di struk
-                'sub_total_numeric' => (float)($transaksi['total_harga'] ?? 0) + (float)($transaksi['total_diskon'] ?? 0), // Total sebelum diskon (hitung dari DB)
+                'sub_total_numeric' => (float)($transaksi['total_harga'] ?? 0) + (float)($transaksi['total_diskon'] ?? 0), 
                 'total_diskon_numeric' => (float)($transaksi['total_diskon'] ?? 0),
-                'total_harga_neto_numeric' => (float)($transaksi['total_harga'] ?? 0), // Ini adalah total setelah diskon dari DB
+                'total_harga_neto_numeric' => (float)($transaksi['total_harga'] ?? 0), 
                 'uang_bayar_numeric' => (float)($transaksi['uang_bayar'] ?? 0),
-                'diskon_persen_pelanggan' => (float)($transaksi['diskon_pelanggan_saat_transaksi'] ?? 0), // Ambil dari data transaksi
+                'diskon_persen_pelanggan' => (float)($transaksi['diskon_pelanggan_saat_transaksi'] ?? 0),
                 'kembalian_numeric' => (float)$transaksi['kembalian'],
                 'items' => array_map(function($item) {
                     return [
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             strukContent += `            Jawa Barat 17610             \n`; 
             strukContent += `============================================\n`;
             strukContent += `No. Transaksi : ${strukData.kode_transaksi.padEnd(25)}\n`;
-            strukContent += `Tanggal       : ${strukData.tanggal_transaksi}\n`; // Tanggal sudah diformat
+            strukContent += `Tanggal       : ${strukData.tanggal_transaksi}\n`;
             strukContent += `Member        : ${strukData.nama_pelanggan.padEnd(25)}\n`;
             strukContent += `Kasir         : ${strukData.nama_kasir.padEnd(25)}\n`;
             strukContent += `Metode Bayar  : ${strukData.metode_pembayaran.padEnd(25)}\n`;
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 strukData.items.forEach(item => {
                     const itemSubtotal = item.qty * item.harga;
                     calculatedTotal += itemSubtotal;                    
-                    const namaProduk = item.nama || 'Produk Tidak Dikenal'; // Fallback jika nama tidak ada
+                    const namaProduk = item.nama || 'Produk Tidak Dikenal'; 
                     const namaProdukDisplay = namaProduk.length > 20 ? namaProduk.substring(0, 17) + '...' : namaProduk;
                     
                     strukContent += `- ${namaProdukDisplay.padEnd(20)} \n`;

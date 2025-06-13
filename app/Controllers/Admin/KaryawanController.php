@@ -24,7 +24,7 @@ class KaryawanController extends BaseController
 
     public function index()
     {
-        // ID Karyawan yang ingin disembunyikan (pemilik)
+        
         $excludedKaryawanId = 'KRY-OWNER-001';
 
         $data = [
@@ -46,12 +46,17 @@ class KaryawanController extends BaseController
 
     public function store()
     {
-    log_message('critical', '[[ KARYAWAN CONTROLLER :: STORE METHOD CALLED ]]'); 
-        $rules = [
-            'nama' => 'required|min_length[3]',
+    log_message('critical', '[[ KARYAWAN CONTROLLER :: STORE METHOD CALLED ]]');        $rules = [
+            'nama' => [
+                'rules'  => 'required|alpha_space|min_length[3]|max_length[100]',
+                'errors' => [
+                    'alpha_space' => 'Nama karyawan hanya boleh berisi karakter alfabet dan spasi.',
+                    'required'    => 'Nama karyawan wajib diisi.'
+                ]
+            ],
             'email' => 'required|valid_email|is_unique[karyawan.email]',
             'password' => 'required|min_length[6]',
-            'role' => 'required|in_list[admin,kasir]'
+            'role' => 'required|in_list[admin,kasir,kepala_toko]'
         ];
 
         if (!$this->validate($rules)) {
@@ -113,11 +118,16 @@ class KaryawanController extends BaseController
         if ($this->request->getPost('email') == $karyawanLama['email']) {
             $emailRule = 'required|valid_email';
         }
-
         $rules = [
-            'nama' => 'required|min_length[3]',
+            'nama' => [
+                'rules'  => 'required|alpha_space|min_length[3]|max_length[100]',
+                'errors' => [
+                    'alpha_space' => 'Nama karyawan hanya boleh berisi karakter alfabet dan spasi.',
+                    'required'    => 'Nama karyawan wajib diisi.'
+                ]
+            ],
             'email' => $emailRule,
-            'role' => 'required|in_list[admin,kasir]'
+            'role' => 'required|in_list[admin,kasir,kepala_toko]'
         ];
 
         // Password hanya diupdate jika diisi

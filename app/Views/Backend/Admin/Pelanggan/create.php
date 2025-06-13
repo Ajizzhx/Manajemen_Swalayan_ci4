@@ -38,14 +38,16 @@
 
 
                 <?= form_open('/admin/pelanggan/store') ?>
-                    <?= csrf_field() ?>
-                    <div class="form-group">
+                    <?= csrf_field() ?>                    <div class="form-group">
                         <label for="no_ktp">No KTP <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="no_ktp" name="no_ktp" value="<?= old('no_ktp') ?>" required pattern="[0-9]{8,32}" maxlength="32" minlength="8" title="Masukkan No KTP (8-32 digit angka, unik)">
+                        <input type="text" class="form-control" id="no_ktp" name="no_ktp" value="<?= old('no_ktp') ?>" required pattern="[0-9]{16}" maxlength="16" minlength="16" title="Masukkan No KTP (16 digit angka, tanpa spasi atau karakter lain)">
                     </div>
                     <div class="form-group">
                         <label for="nama">Nama Member <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="nama" name="nama" value="<?= old('nama') ?>" required>
+                        <?php if ($validation && $validation->hasError('nama')): ?>
+                            <div class="text-danger" style="font-size: 12px;"><?= $validation->getError('nama') ?></div>
+                        <?php endif; ?>
                     </div>
                     <div class="form-group">
                     <label for="email">Email <span class="text-danger">*</span></label>

@@ -63,12 +63,12 @@
                                     foreach ($audit_logs as $log): ?>
                                     <tr>
                                         <td><?= $no++ ?></td>
-                                        <td><?= esc(format_indo($log->created_at, true)) // Asumsi kolom timestamp adalah created_at dan Anda punya helper format_indo ?></td>
+                                        <td><?= esc(format_indo($log->created_at, true)) ?></td>
                                         <td><?= esc($log->user_id ?? 'N/A') ?></td>
                                         <td><?= esc($log->nama_pengguna ?? ($log->user_id ? 'Pengguna Tidak Ditemukan' : 'Sistem')) ?></td>
-                                        <td><?= esc($log->action) // Asumsi ada kolom action ?></td>
-                                        <td><?= esc($log->description ?? '') // Asumsi ada kolom description ?></td>
-                                        <td><?= esc($log->ip_address ?? 'N/A') // Asumsi ada kolom ip_address ?></td>
+                                        <td><?= esc($log->action)  ?></td>
+                                        <td><?= esc($log->description ?? '')  ?></td>
+                                        <td><?= esc($log->ip_address ?? 'N/A')  ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
