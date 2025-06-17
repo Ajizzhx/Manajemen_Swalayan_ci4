@@ -16,11 +16,17 @@ class MonitoringController extends BaseController
 
     public function stok()
     {
+        $stockStatus = $this->monitoringModel->getStockStatus();
+        
         $data = [
             'title' => 'Monitoring Stok',
-            'products' => $this->monitoringModel->getStockStatus(),
+            'products' => $stockStatus['products'],
             'lowStockThreshold' => 10,
-            'lowStockProducts' => $this->monitoringModel->getLowStockProducts()
+            'lowStockProducts' => $this->monitoringModel->getLowStockProducts(),
+            'totalProducts' => $stockStatus['totalProducts'],
+            'lowStockCount' => $stockStatus['lowStockCount'],
+            'outOfStockCount' => $stockStatus['outOfStockCount'],
+            'wellStockedCount' => $stockStatus['wellStockedCount']
         ];
         
         return view('Backend/monitoring/stok', $data);

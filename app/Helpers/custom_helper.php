@@ -15,7 +15,8 @@ if (!function_exists('generate_sequential_id')) {
         
         $lastIdObj = $model->withDeleted(true)->selectMax($columnName)->like($columnName, $safePrefix, 'after')->orderBy($columnName, 'DESC')->get(1)->getFirstRow();
 
-        log_message('debug', '[custom_helper::generate_sequential_id] Query result for max ID: ' . json_encode($lastIdObj));
+        // Mengubah dari debug ke info untuk mengurangi log
+        log_message('info', '[custom_helper::generate_sequential_id] Generated new sequential ID');
         
 
         $nextNumber = 1;
@@ -49,7 +50,8 @@ if (!function_exists('generate_daily_sequential_id')) {
         
         $lastIdObjDaily = $model->withDeleted(true)->selectMax($columnName)->like($columnName, $fullPrefix, 'after')->orderBy($columnName, 'DESC')->get(1)->getFirstRow();
 
-        log_message('debug', '[custom_helper::generate_daily_sequential_id] Query result for max daily ID: ' . json_encode($lastIdObjDaily));
+        // Menghapus log debug detail
+        // log_message('debug', '[custom_helper::generate_daily_sequential_id] Query result for max daily ID: ' . json_encode($lastIdObjDaily));
         
 
         $nextNumber = 1;

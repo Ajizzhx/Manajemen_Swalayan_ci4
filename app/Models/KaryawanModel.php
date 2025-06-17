@@ -26,27 +26,19 @@ class KaryawanModel extends Model
 
     protected function hashPassword(array $data)
     {
-        log_message('debug', '[KaryawanModel::hashPassword] Callback triggered. Incoming data: ' . json_encode($data));
-
+        // Menghapus log debugging
         if (!isset($data['data']['password'])) {
-            log_message('debug', '[KaryawanModel::hashPassword] "password" key is not set in data[data]. No password to hash or update.');
             return $data;
         }
-
 
         $plainPassword = $data['data']['password'];
 
         if ($plainPassword === '') {
-           
-            log_message('debug', '[KaryawanModel::hashPassword] "password" key is set but the value is an empty string. Unsetting from data to avoid saving an empty hash or an empty string directly.');
-           
             unset($data['data']['password']);
             return $data;
         }
-
       
         $hashedPassword = hash('sha256', $plainPassword);
-        log_message('debug', '[KaryawanModel::hashPassword] Hashing password. Plain: "' . $plainPassword . '", Hashed: "' . $hashedPassword . '"');
         $data['data']['password'] = $hashedPassword;
         return $data;
     }

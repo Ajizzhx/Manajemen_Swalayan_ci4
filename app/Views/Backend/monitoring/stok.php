@@ -34,7 +34,7 @@
                         <i class="glyphicon glyphicon-warning-sign glyphicon-l"></i>
                     </div>
                     <div class="col-sm-9 col-lg-7 widget-right">
-                        <div class="large text-center" id="lowStockCount">0</div>
+                        <div class="large text-center"><?= $lowStockCount ?></div>
                         <div class="text-muted text-center">Stok Menipis</div>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                         <i class="glyphicon glyphicon-shopping-cart glyphicon-l"></i>
                     </div>
                     <div class="col-sm-9 col-lg-7 widget-right">
-                        <div class="large text-center" id="totalProducts">0</div>
+                        <div class="large text-center"><?= $totalProducts ?></div>
                         <div class="text-muted text-center">Total Produk</div>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
                         <i class="glyphicon glyphicon-remove-circle glyphicon-l"></i>
                     </div>
                     <div class="col-sm-9 col-lg-7 widget-right">
-                        <div class="large text-center" id="outOfStockCount">0</div>
+                        <div class="large text-center"><?= $outOfStockCount ?></div>
                         <div class="text-muted text-center">Stok Habis</div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                         <i class="glyphicon glyphicon-ok-circle glyphicon-l"></i>
                     </div>
                     <div class="col-sm-9 col-lg-7 widget-right">
-                        <div class="large text-center" id="wellStockedCount">0</div>
+                        <div class="large text-center"><?= $wellStockedCount ?></div>
                         <div class="text-muted text-center">Stok Aman</div>
                     </div>
                 </div>

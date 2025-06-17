@@ -38,7 +38,7 @@ class Logger extends BaseConfig
      *
      * @var int|list<int>
      */
-    public $threshold = (ENVIRONMENT === 'production') ? 4 : 9;
+    public $threshold = 4; // Hanya mencatat runtime errors dan level di atasnya
 
     /**
      * --------------------------------------------------------------------------
@@ -87,7 +87,6 @@ class Logger extends BaseConfig
                 'critical',
                 'alert',
                 'emergency',
-                'debug',
                 'error',
                 'info',
                 'notice',
@@ -118,6 +117,18 @@ class Logger extends BaseConfig
              * Specify a different destination here, if desired.
              */
             'path' => '',
+            
+            /*
+             * Maximum size in bytes for log files before a new one is created.
+             * Set to zero (0) for no limit.
+             */
+            'maxSize' => 1024 * 1024, // 1 MB
+            
+            /*
+             * Maximum number of log files to keep.
+             * Set to zero (0) for no limit.
+             */
+            'maxFiles' => 5,
         ],
 
         /*

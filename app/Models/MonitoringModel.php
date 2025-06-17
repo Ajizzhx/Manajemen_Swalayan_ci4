@@ -26,7 +26,9 @@ class MonitoringModel extends Model
     }    public function getStockStatus()
     {
         $db = \Config\Database::connect();
-        return $db->table('produk')
+        
+        // Get basic product data first
+        $products = $db->table('produk')
             ->select('
                 produk.kode_barcode as kode_produk, 
                 produk.nama as nama_produk,
@@ -37,6 +39,29 @@ class MonitoringModel extends Model
             ->where('produk.is_deleted', 0)
             ->get()
             ->getResultArray();
+
+        // Calculate stock statistics
+        $lowStockThreshold = 10; // Threshold for low stock
+        $stats = [
+            'products' => $products,
+            'totalProducts' => count($products),
+            'lowStockCount' => 0,
+            'outOfStockCount' => 0,
+            'wellStockedCount' => 0
+        ];
+
+        // Count products in each category
+        foreach ($products as $product) {
+            if ($product['stok'] <= 0) {
+                $stats['outOfStockCount']++;
+            } elseif ($product['stok'] <= $lowStockThreshold) {
+                $stats['lowStockCount']++;
+            } else {
+                $stats['wellStockedCount']++;
+            }
+        }
+
+        return $stats;
     }
 
     public function getSalesDataByDateRange($startDate, $endDate)
