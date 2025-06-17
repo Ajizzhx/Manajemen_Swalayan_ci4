@@ -74,6 +74,9 @@ $routes->group('admin', ['filter' => 'roleGuard:admin,pemilik,kepala_toko', 'nam
     $routes->get('laporan/produk-terlaris', 'LaporanController::produkTerlaris', ['as' => 'admin.laporan.produkterlaris']);
     $routes->get('laporan/metode-pembayaran-populer', 'LaporanController::metodePembayaranPopuler', ['as' => 'admin.laporan.metodepembayaran']);
     
+    // Audit Log untuk Admin
+    $routes->get('audit-log', 'AuditController::index', ['as' => 'admin.auditlog', 'filter' => 'roleGuard:admin']);
+    
 
     // Pengaturan & Profil Umum (Admin & Pemilik) - Menggunakan namespace App\Controllers\Common
     $routes->get('settings', '\App\Controllers\Common\SettingsController::index', ['as' => 'admin.settings']);

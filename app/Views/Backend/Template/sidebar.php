@@ -46,7 +46,7 @@
 					<a data-toggle="collapse" href="#sub-item-laporan">
 						<span class="glyphicon glyphicon-stats"></span> Laporan & Analisis <span class="icon pull-right"><em class="glyphicon glyphicon-s glyphicon-plus"></em></span>
 					</a>
-					<ul class="children collapse <?= (strpos(uri_string(), 'admin/laporan') !== false) ? 'in' : '' ?>" id="sub-item-laporan">
+					<ul class="children collapse <?= (strpos(uri_string(), 'admin/laporan') !== false || (strpos(uri_string(), 'admin/audit-log') !== false && $userRole === 'admin')) ? 'in' : '' ?>" id="sub-item-laporan">
 						<li class="<?= (strpos(uri_string(), 'admin/laporan/transaksi') !== false) ? 'active' : '' ?>">
 							<a href="<?= site_url('admin/laporan/transaksi') ?>"><span class="glyphicon glyphicon-transfer"></span> Riwayat Transaksi</a>
 						</li>
@@ -58,6 +58,11 @@
 						<li class="<?= (strpos(uri_string(), 'admin/laporan/produk-terlaris') !== false) ? 'active' : '' ?>">
 							<a href="<?= site_url('admin/laporan/produk-terlaris') ?>"><span class="glyphicon glyphicon-star"></span> Produk Terlaris</a>
 						</li>
+						<?php if ($userRole === 'admin'): ?>
+						<li class="<?= (strpos(uri_string(), 'admin/audit-log') !== false) ? 'active' : '' ?>">
+							<a href="<?= site_url('admin/audit-log') ?>"><span class="glyphicon glyphicon-eye-open"></span> Log Audit</a>
+						</li>
+						<?php endif; ?>
 					</ul>
 				</li>
 
