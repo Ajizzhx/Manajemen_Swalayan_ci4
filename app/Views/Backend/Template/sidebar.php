@@ -78,6 +78,9 @@
 						<li class="<?= (strpos(uri_string(), 'admin/owner-area/audit-log') !== false) ? 'active' : '' ?>">
 							<a href="<?= site_url('admin/owner-area/audit-log') ?>"><span class="glyphicon glyphicon-eye-open"></span> Log Audit</a>
 						</li>
+						<li class="<?= (strpos(uri_string(), 'admin/owner-area/transaksi-approval') !== false) ? 'active' : '' ?>">
+							<a href="<?= site_url('admin/owner-area/transaksi-approval') ?>"><span class="glyphicon glyphicon-check"></span> Persetujuan Hapus</a>
+						</li>
 						<li class="<?= (strpos(uri_string(), 'admin/owner-area/karyawan') !== false) ? 'active' : '' ?>">
 							<a href="<?= site_url('admin/owner-area/karyawan') ?>"><span class="glyphicon glyphicon-briefcase"></span> Kelola Karyawan</a>
 						</li>
