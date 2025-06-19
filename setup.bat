@@ -86,6 +86,8 @@ echo    app/Config/Email.php
 echo.
 echo 3. Akses aplikasi melalui: 
 echo    http://localhost/swalayan_ci4/public/
+echo    Jika direktori bernama Manajemen_Swalayan_ci4-main:
+echo    http://localhost/Manajemen_Swalayan_ci4-main/public/
 echo.
 
 pause

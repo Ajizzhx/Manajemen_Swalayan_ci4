@@ -14,12 +14,17 @@
 
 ## Langkah-langkah Instalasi (Ringkas)
 
+### Catatan Tentang Nama Direktori
+Jika Anda mengunduh dari GitHub, nama direktori default mungkin `Manajemen_Swalayan_ci4-main` bukan `swalayan_ci4`. Dalam panduan ini, kami menggunakan `swalayan_ci4` untuk konsistensi. Anda dapat:
+1. Mengubah nama direktori menjadi `swalayan_ci4`, ATAU
+2. Menyesuaikan path di browser menjadi `http://localhost/Manajemen_Swalayan_ci4-main/public/`
+
 ### Cara Paling Mudah (Rekomendasi)
 1. Pastikan XAMPP sudah terinstal dan berjalan (Apache & MySQL)
 2. **Windows**: Klik dua kali pada file `setup.bat`  
    **Linux/Mac**: Jalankan perintah `bash setup.sh`
 3. Script akan otomatis menginstal library dan database dalam satu langkah
-4. Buka http://localhost/swalayan_ci4/public dan login
+4. Buka http://localhost/swalayan_ci4/public dan login (atau sesuaikan dengan nama direktori)
 5. Perbarui email pemilik dengan menjalankan `php setup_owner_email.php`
 
 ## Langkah-langkah Instalasi (Detail)
@@ -96,7 +101,16 @@
 
 ### Langkah 3: Akses Aplikasi Web
 1. Buka browser
-2. Akses URL: http://localhost/swalayan_ci4/public
+2. Akses URL dengan salah satu dari dua cara berikut:
+
+   #### Menggunakan Apache/XAMPP (Direkomendasikan):
+   - Jika direktori bernama `swalayan_ci4`: http://localhost/swalayan_ci4/public
+   - Jika direktori bernama `Manajemen_Swalayan_ci4-main`: http://localhost/Manajemen_Swalayan_ci4-main/public
+   
+   #### Menggunakan Server Pengembangan CI4:
+   - Jalankan terlebih dahulu: `php spark serve` dari terminal
+   - Lalu akses: http://localhost:8080
+   
 3. Login menggunakan akun pemilik (owner) terlebih dahulu:
 
    **Pemilik (Owner):**

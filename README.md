@@ -4,6 +4,26 @@
 
 Swalayan CI4 adalah sistem Point of Sale (POS) berbasis web yang dibangun menggunakan framework CodeIgniter 4. Aplikasi ini dirancang untuk membantu manajemen toko/swalayan dalam mengelola inventaris produk, transaksi penjualan, pelanggan, supplier, dan laporan keuangan.
 
+## Catatan Penting: Nama Direktori
+
+Jika Anda mengunduh dari GitHub, nama direktori default adalah `Manajemen_Swalayan_ci4-main` bukan `swalayan_ci4`. Anda memiliki dua opsi:
+
+1. **Mengubah nama direktori**:
+   ```
+   rename Manajemen_Swalayan_ci4-main swalayan_ci4
+   ```
+   atau
+   ```
+   mv Manajemen_Swalayan_ci4-main swalayan_ci4
+   ```
+
+2. **Menyesuaikan URL akses**:
+   ```
+   http://localhost/Manajemen_Swalayan_ci4-main/public/
+   ```
+   
+Semua contoh dalam dokumentasi ini mengasumsikan direktori bernama `swalayan_ci4`, jadi sesuaikan path jika diperlukan.
+
 ## Panduan Lengkap
 
 Untuk panduan lengkap instalasi dan konfigurasi, lihat file-file berikut:
@@ -139,6 +159,10 @@ Namun untuk project **Swalayan CI4** ini, semua konfigurasi dasar **sudah dilaku
    - Membuat dan mengkonfigurasi database dan user default
    - Menampilkan langkah-langkah selanjutnya yang perlu dilakukan
 
+> **CATATAN PENTING**: Jika Anda mengunduh dari GitHub, nama direktori default mungkin menjadi `Manajemen_Swalayan_ci4-main`. Anda dapat:
+> 1. Mengubah nama direktori menjadi `swalayan_ci4`, ATAU
+> 2. Menyesuaikan path di browser menjadi `http://localhost/Manajemen_Swalayan_ci4-main/public/`
+
 ### 4. Instalasi Manual
 
 1. Masuk ke direktori proyek
@@ -254,6 +278,11 @@ Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4
    ```
    http://localhost/swalayan_ci4/public
    ```
+   
+   Jika Anda mengunduh dari GitHub dan tidak mengubah nama direktori:
+   ```
+   http://localhost/Manajemen_Swalayan_ci4-main/public
+   ```
 
 3. Atau gunakan server pengembangan bawaan CodeIgniter:
    ```
@@ -263,6 +292,8 @@ Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4
    ```
    http://localhost:8080
    ```
+
+   > **Penjelasan Penting**: URL `http://localhost:8080` dan `http://localhost/swalayan_ci4/public` keduanya valid tetapi menggunakan server web yang berbeda. URL pertama menggunakan server pengembangan bawaan CI4, sedangkan yang kedua menggunakan Apache melalui XAMPP. Lihat bagian [Cara Mengakses Aplikasi](#cara-mengakses-aplikasi-perbedaan-url) untuk penjelasan lengkap.
 
 **Penting:** Sesuai dengan standar keamanan CodeIgniter 4, `index.php` berada di dalam folder *public*, bukan di root proyek. Untuk produksi, sebaiknya konfigurasi web server Anda untuk mengarah ke folder *public* proyek, bukan ke root proyek.
 
@@ -396,3 +427,120 @@ php spark db:seed NamaSeeder
 4. **Performance**:
    - Aktifkan caching jika diperlukan
    - Gunakan query builder untuk operasi database kompleks
+
+## Konfigurasi Server dan Routing
+
+### Konfigurasi Apache
+
+CodeIgniter 4 menyimpan file `index.php` di dalam folder `public/`. Berikut cara konfigurasi Apache untuk CI4:
+
+1. **File .htaccess di root project**
+```
+# Disable directory browsing
+Options -Indexes
+
+# ----------------------------------------------------------------------
+# Rewrite engine
+# ----------------------------------------------------------------------
+RewriteEngine On
+
+# If the file/dir exists, just serve it
+RewriteCond %{REQUEST_FILENAME} -f [OR]  
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule (.*) - [L]
+
+# Otherwise, serve the index.php
+RewriteRule (.*) index.php [L]  
+```
+
+2. **File .htaccess di folder public/**
+```
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]
+```
+
+### Konfigurasi Virtual Host (Opsional)
+Untuk pengembangan lokal, Anda dapat menambahkan virtual host:
+
+1. Edit file hosts (Windows: `C:\Windows\System32\drivers\etc\hosts`, Linux/Mac: `/etc/hosts`):
+```
+127.0.0.1   swalayan.local
+```
+
+2. Tambahkan konfigurasi virtual host di Apache:
+```
+<VirtualHost *:80>
+    DocumentRoot "C:/xampp/htdocs/swalayan_ci4/public"
+    ServerName swalayan.local
+    
+    <Directory "C:/xampp/htdocs/swalayan_ci4/public">
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+### Path Alternatif untuk Repository GitHub
+Jika Anda mengunduh dari GitHub dan tidak mengubah nama direktori, gunakan konfigurasi berikut:
+
+```
+<VirtualHost *:80>
+    DocumentRoot "C:/xampp/htdocs/Manajemen_Swalayan_ci4-main/public"
+    ServerName swalayan.local
+    
+    <Directory "C:/xampp/htdocs/Manajemen_Swalayan_ci4-main/public">
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+### Routing CodeIgniter 4
+
+Aplikasi ini menggunakan sistem routing CI4 yang terletak di file `app/Config/Routes.php`. Beberapa rute utama:
+
+- `/` - Halaman login
+- `/admin/dashboard` - Dashboard admin
+- `/kasir/dashboard` - Dashboard kasir
+- `/pemilik/dashboard` - Dashboard pemilik
+
+## Cara Mengakses Aplikasi (Perbedaan URL)
+
+Ada dua cara untuk mengakses aplikasi CodeIgniter 4, keduanya valid tapi menggunakan server web yang berbeda:
+
+### 1. Menggunakan Apache/XAMPP (http://localhost/swalayan_ci4/public/)
+
+```
+http://localhost/swalayan_ci4/public/
+```
+atau jika menggunakan nama direktori GitHub:
+```
+http://localhost/Manajemen_Swalayan_ci4-main/public/
+```
+
+- **Bagaimana cara ini bekerja**: Apache menjadi web server yang melayani aplikasi
+- **Kelebihan**: Lebih mirip dengan lingkungan produksi, mendukung .htaccess
+- **Pengaturan**: Aplikasi ditempatkan di folder htdocs XAMPP
+- **Prasyarat**: Apache harus berjalan melalui XAMPP/WAMP
+
+### 2. Menggunakan Server Pengembangan CI4 (http://localhost:8080/)
+
+```
+http://localhost:8080/
+```
+
+- **Bagaimana cara ini bekerja**: CodeIgniter memiliki server pengembangan built-in
+- **Cara menjalankan**: Gunakan perintah `php spark serve` dari folder proyek
+- **Kelebihan**: Tidak memerlukan Apache, mudah untuk pengembangan cepat
+- **Batasan**: Hanya untuk pengembangan, bukan untuk produksi
+- **Port**: Secara default menggunakan port 8080
+
+### Mana yang Sebaiknya Digunakan?
+
+- **Untuk pengembangan awal/cepat**: `php spark serve` (http://localhost:8080/)
+- **Untuk pengujian yang lebih mirip produksi**: Apache via XAMPP (http://localhost/swalayan_ci4/public/)
+- **Untuk deployment produksi**: Gunakan Apache/Nginx dengan konfigurasi yang tepat
+
+> **Catatan**: Dalam dokumentasi ini, kami lebih banyak mereferensikan URL Apache karena lebih cocok untuk lingkungan yang menyerupai produksi.
