@@ -9,10 +9,13 @@ Swalayan CI4 adalah sistem Point of Sale (POS) berbasis web yang dibangun menggu
 Jika Anda mengunduh dari GitHub, nama direktori default adalah `Manajemen_Swalayan_ci4-main` bukan `swalayan_ci4`. Anda memiliki dua opsi:
 
 1. **Mengubah nama direktori**:
+
    ```
    rename Manajemen_Swalayan_ci4-main swalayan_ci4
    ```
+
    atau
+
    ```
    mv Manajemen_Swalayan_ci4-main swalayan_ci4
    ```
@@ -21,12 +24,13 @@ Jika Anda mengunduh dari GitHub, nama direktori default adalah `Manajemen_Swalay
    ```
    http://localhost/Manajemen_Swalayan_ci4-main/public/
    ```
-   
+
 Semua contoh dalam dokumentasi ini mengasumsikan direktori bernama `swalayan_ci4`, jadi sesuaikan path jika diperlukan.
 
 ## Panduan Lengkap
 
 Untuk panduan lengkap instalasi dan konfigurasi, lihat file-file berikut:
+
 - [PANDUAN_INSTALASI.md](PANDUAN_INSTALASI.md) - Panduan instalasi detil
 - [PANDUAN_SETUP_EMAIL_OTP.md](PANDUAN_SETUP_EMAIL_OTP.md) - Cara mengkonfigurasi email OTP
 
@@ -106,16 +110,19 @@ swalayan_ci4/
 Biasanya, untuk instalasi framework CI4 dari awal, langkah-langkahnya adalah:
 
 1. **Instalasi via Composer**:
+
    ```
    composer create-project codeigniter4/appstarter project-name
    ```
 
 2. **Konfigurasi Environment**:
+
    - Salin file `env` menjadi `.env`
    - Set `CI_ENVIRONMENT = development` untuk debugging
    - Konfigurasi database dan preferensi aplikasi lainnya
 
 3. **Jalankan Server Pengembangan**:
+
    ```
    php spark serve
    ```
@@ -160,26 +167,32 @@ Namun untuk project **Swalayan CI4** ini, semua konfigurasi dasar **sudah dilaku
    - Menampilkan langkah-langkah selanjutnya yang perlu dilakukan
 
 > **CATATAN PENTING**: Jika Anda mengunduh dari GitHub, nama direktori default mungkin menjadi `Manajemen_Swalayan_ci4-main`. Anda dapat:
+>
 > 1. Mengubah nama direktori menjadi `swalayan_ci4`, ATAU
 > 2. Menyesuaikan path di browser menjadi `http://localhost/Manajemen_Swalayan_ci4-main/public/`
 
 ### 4. Instalasi Manual
 
 1. Masuk ke direktori proyek
+
    ```
    cd swalayan_ci4
    ```
 
 2. Instal library yang dibutuhkan dengan:
+
    ```
    php setup_libraries.php
    ```
+
    atau jika Composer sudah terinstal:
+
    ```
    composer install
    ```
 
 3. Setup database dengan:
+
    ```
    php setup_database.php
    ```
@@ -195,10 +208,13 @@ Namun untuk project **Swalayan CI4** ini, semua konfigurasi dasar **sudah dilaku
 Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4 untuk menyimpan setting yang sensitif seperti kredensial database.
 
 1. Salin file `env` menjadi `.env`
+
    ```
    cp env .env
    ```
+
    atau pada Windows:
+
    ```
    copy env .env
    ```
@@ -206,6 +222,7 @@ Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4
 2. Edit file `.env` dan sesuaikan konfigurasi berikut:
 
    **Konfigurasi Environment**:
+
    ```
    # Setel ke 'development' untuk melihat detail error
    # Setel ke 'production' untuk deployment live
@@ -213,21 +230,24 @@ Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4
    ```
 
    **Konfigurasi Database**:
+
    ```
    database.default.hostname = localhost
    database.default.database = swalayan_db
    database.default.username = root
-   database.default.password = 
+   database.default.password =
    database.default.DBDriver = MySQLi
    database.default.port = 3306
    ```
 
    **Konfigurasi App URL (opsional)**:
+
    ```
    app.baseURL = 'http://localhost/swalayan_ci4/public/'
    ```
 
 3. Jika Anda ingin mengubah nama database, pastikan untuk mengubah:
+
    - Konfigurasi di file `.env`
    - Parameter di `setup_database.php` (jika menggunakan script setup database)
 
@@ -238,6 +258,7 @@ Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4
 #### Opsi 1: Menggunakan Script Setup Otomatis
 
 1. Untuk pengguna Windows, jalankan:
+
    ```
    setup_db.bat
    ```
@@ -250,11 +271,13 @@ Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4
 #### Opsi 2: Setup Manual
 
 1. Buat database baru bernama `swalayan_db` melalui phpMyAdmin atau command line MySQL
+
    ```
    CREATE DATABASE swalayan_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
    ```
 
 2. Jalankan migrasi database melalui command line:
+
    ```
    php spark migrate
    ```
@@ -275,33 +298,39 @@ Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4
 
 1. Pastikan web server (Apache) sudah berjalan
 2. Buka browser dan akses aplikasi melalui URL:
+
    ```
    http://localhost/swalayan_ci4/public
    ```
-   
+
    Jika Anda mengunduh dari GitHub dan tidak mengubah nama direktori:
+
    ```
    http://localhost/Manajemen_Swalayan_ci4-main/public
    ```
 
 3. Atau gunakan server pengembangan bawaan CodeIgniter:
+
    ```
    php spark serve
    ```
+
    dan akses melalui URL:
+
    ```
    http://localhost:8080
    ```
 
    > **Penjelasan Penting**: URL `http://localhost:8080` dan `http://localhost/swalayan_ci4/public` keduanya valid tetapi menggunakan server web yang berbeda. URL pertama menggunakan server pengembangan bawaan CI4, sedangkan yang kedua menggunakan Apache melalui XAMPP. Lihat bagian [Cara Mengakses Aplikasi](#cara-mengakses-aplikasi-perbedaan-url) untuk penjelasan lengkap.
 
-**Penting:** Sesuai dengan standar keamanan CodeIgniter 4, `index.php` berada di dalam folder *public*, bukan di root proyek. Untuk produksi, sebaiknya konfigurasi web server Anda untuk mengarah ke folder *public* proyek, bukan ke root proyek.
+**Penting:** Sesuai dengan standar keamanan CodeIgniter 4, `index.php` berada di dalam folder _public_, bukan di root proyek. Untuk produksi, sebaiknya konfigurasi web server Anda untuk mengarah ke folder _public_ proyek, bukan ke root proyek.
 
 ## Akses Login Default
 
 Setelah proses setup database selesai, Anda bisa menggunakan akun default berikut untuk login:
 
 ### Pemilik (Owner):
+
 - Email: owner@swalayan.com (sebaiknya update dengan email aktif Anda menggunakan script `setup_owner_email.php`)
 - Password: owner123
 - **PENTING**: Login sebagai pemilik memerlukan verifikasi OTP yang dikirim ke email. Anda perlu menjalankan `setup_owner_email.php` terlebih dahulu untuk update email pemilik, dan mengkonfigurasi pengiriman email OTP seperti dijelaskan di `PANDUAN_SETUP_EMAIL_OTP.md`
@@ -309,11 +338,13 @@ Setelah proses setup database selesai, Anda bisa menggunakan akun default beriku
 ### Akun lain yang tersedia:
 
 **Admin:**
+
 - Email: admin@swalayan.com
 - Password: admin123
 - Memiliki akses ke manajemen produk, supplier, kategori, dan transaksi
 
 **Kasir:**
+
 - Email: kasir@swalayan.com
 - Password: kasir123
 - Memiliki akses terbatas hanya untuk transaksi penjualan
@@ -322,14 +353,14 @@ Setelah proses setup database selesai, Anda bisa menggunakan akun default beriku
 
 Beberapa script yang tersedia untuk proses instalasi dan troubleshooting:
 
-| Script | Fungsi | Cara Penggunaan |
-|--------|--------|-----------------|
-| **setup.bat / setup.sh** | Setup lengkap (library + database) | Klik dua kali atau `bash setup.sh` |
-| **setup_libraries.php** | Hanya menginstal library | `php setup_libraries.php` |
-| **setup_database.php** | Hanya membuat database dan tabel | `php setup_database.php` |
-| **setup_owner_email.php** | Update email pemilik untuk OTP | `php setup_owner_email.php` |
-| **fix_owner_role.php** | Memperbaiki role owner/pemilik | `php fix_owner_role.php` |
-| **fix_auth.php** | Memperbaiki masalah pada Auth | `php fix_auth.php` |
+| Script                    | Fungsi                             | Cara Penggunaan                    |
+| ------------------------- | ---------------------------------- | ---------------------------------- |
+| **setup.bat / setup.sh**  | Setup lengkap (library + database) | Klik dua kali atau `bash setup.sh` |
+| **setup_libraries.php**   | Hanya menginstal library           | `php setup_libraries.php`          |
+| **setup_database.php**    | Hanya membuat database dan tabel   | `php setup_database.php`           |
+| **setup_owner_email.php** | Update email pemilik untuk OTP     | `php setup_owner_email.php`        |
+| **fix_owner_role.php**    | Memperbaiki role owner/pemilik     | `php fix_owner_role.php`           |
+| **fix_auth.php**          | Memperbaiki masalah pada Auth      | `php fix_auth.php`                 |
 
 ## Struktur Database
 
@@ -352,10 +383,12 @@ Sistem menggunakan beberapa tabel utama:
 Aplikasi Swalayan CI4 mengikuti pola MVC (Model-View-Controller) sesuai standar CodeIgniter 4:
 
 1. **Models** (`app/Models/`): Berisi logika data dan interaksi dengan database
+
    - Contoh: `ProdukModel.php`, `TransaksiModel.php`
    - Menggunakan Entity classes untuk representasi data yang lebih OOP
 
 2. **Views** (`app/Views/`): Template untuk antarmuka pengguna
+
    - Menggunakan template engine bawaan CI4
    - Template utama di `Views/Backend/`
    - Berisi partial views yang reusable
@@ -367,15 +400,18 @@ Aplikasi Swalayan CI4 mengikuti pola MVC (Model-View-Controller) sesuai standar 
 ### Cara Menambahkan Fitur Baru
 
 1. **Menambahkan Tabel Database**:
+
    - Buat file migrasi baru: `php spark make:migration NamaTable`
    - Edit file migrasi di `app/Database/Migrations/`
    - Jalankan migrasi: `php spark migrate`
 
 2. **Menambahkan Model**:
+
    - Buat model baru: `php spark make:model NamaModel`
    - Define relasi, validasi, dan metode CRUD
 
 3. **Menambahkan Controller**:
+
    - Buat controller baru: `php spark make:controller NamaController`
    - Extend dari `BaseController` dan implement methods
 
@@ -411,15 +447,18 @@ php spark db:seed NamaSeeder
 ### Tips Pengembangan CI4
 
 1. **Lingkungan Development**:
+
    - Set `CI_ENVIRONMENT = development` di `.env`
    - Aktifkan error display untuk debugging
 
 2. **Debugging**:
+
    - Gunakan fungsi `dd()` atau `var_dump()` untuk debugging
    - Periksa logs di `writable/logs/`
    - Aktifkan toolbar debugging CI4 di `.env`
 
 3. **Keamanan**:
+
    - Validasi semua input user dengan `validation` library
    - Gunakan prepared statements untuk query database
    - Implementasi CSRF protection
@@ -435,6 +474,7 @@ php spark db:seed NamaSeeder
 CodeIgniter 4 menyimpan file `index.php` di dalam folder `public/`. Berikut cara konfigurasi Apache untuk CI4:
 
 1. **File .htaccess di root project**
+
 ```
 # Disable directory browsing
 Options -Indexes
@@ -445,15 +485,16 @@ Options -Indexes
 RewriteEngine On
 
 # If the file/dir exists, just serve it
-RewriteCond %{REQUEST_FILENAME} -f [OR]  
+RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule (.*) - [L]
 
 # Otherwise, serve the index.php
-RewriteRule (.*) index.php [L]  
+RewriteRule (.*) index.php [L]
 ```
 
 2. **File .htaccess di folder public/**
+
 ```
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -462,19 +503,22 @@ RewriteRule ^(.*)$ index.php/$1 [L]
 ```
 
 ### Konfigurasi Virtual Host (Opsional)
+
 Untuk pengembangan lokal, Anda dapat menambahkan virtual host:
 
 1. Edit file hosts (Windows: `C:\Windows\System32\drivers\etc\hosts`, Linux/Mac: `/etc/hosts`):
+
 ```
 127.0.0.1   swalayan.local
 ```
 
 2. Tambahkan konfigurasi virtual host di Apache:
+
 ```
 <VirtualHost *:80>
     DocumentRoot "C:/xampp/htdocs/swalayan_ci4/public"
     ServerName swalayan.local
-    
+
     <Directory "C:/xampp/htdocs/swalayan_ci4/public">
         AllowOverride All
         Require all granted
@@ -483,13 +527,14 @@ Untuk pengembangan lokal, Anda dapat menambahkan virtual host:
 ```
 
 ### Path Alternatif untuk Repository GitHub
+
 Jika Anda mengunduh dari GitHub dan tidak mengubah nama direktori, gunakan konfigurasi berikut:
 
 ```
 <VirtualHost *:80>
     DocumentRoot "C:/xampp/htdocs/Manajemen_Swalayan_ci4-main/public"
     ServerName swalayan.local
-    
+
     <Directory "C:/xampp/htdocs/Manajemen_Swalayan_ci4-main/public">
         AllowOverride All
         Require all granted
@@ -515,7 +560,9 @@ Ada dua cara untuk mengakses aplikasi CodeIgniter 4, keduanya valid tapi menggun
 ```
 http://localhost/swalayan_ci4/public/
 ```
+
 atau jika menggunakan nama direktori GitHub:
+
 ```
 http://localhost/Manajemen_Swalayan_ci4-main/public/
 ```

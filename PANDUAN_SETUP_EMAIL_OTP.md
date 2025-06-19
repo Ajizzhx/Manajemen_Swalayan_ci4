@@ -51,6 +51,7 @@ public string $fromName = 'Swalayan POS - Verifikasi Pemilik';
 Anda memiliki DUA cara untuk mengubah email pemilik:
 
 #### Cara 1: Menggunakan Script Khusus (TERMUDAH)
+
 1. Jalankan script berikut di command line:
    ```
    php setup_owner_email.php
@@ -59,8 +60,8 @@ Anda memiliki DUA cara untuk mengubah email pemilik:
 2. Masukkan email aktif yang ingin menerima kode OTP
 3. Script akan otomatis mengupdate email di database
 
-
 #### Cara 2: Mengubah Melalui Database (phpMyAdmin)
+
 1. Buka phpMyAdmin (http://localhost/phpmyadmin)
 2. Pilih database `swalayan_db`
 3. Buka tabel `karyawan`
@@ -88,16 +89,19 @@ Anda memiliki DUA cara untuk mengubah email pemilik:
 Jika Anda mengalami masalah dalam pengiriman OTP, periksa hal-hal berikut:
 
 #### 1. Memastikan Email Config Sudah Benar
+
 - Periksa kembali file `app/Config/Email.php`
 - Pastikan App Password Gmail sudah benar (16 karakter dengan spasi)
 - Pastikan alamat email SMTP ($SMTPUser) dan email pengirim ($fromEmail) sudah benar
 
 #### 2. Jika OTP Tidak Terkirim
+
 - Periksa file log di `writable/logs/` untuk melihat pesan error
 - Periksa folder Spam/Junk di email pemilik
 - Pastikan email pemilik di database sudah benar (tabel karyawan, kolom email)
 
 #### 3. Masalah Port/Firewall
+
 - Pastikan server Anda mengizinkan koneksi keluar ke smtp.gmail.com pada port 465 (SSL) atau 587 (TLS)
 - Jika menggunakan port 587, ubah konfigurasi berikut di Email.php:
   ```php
@@ -106,6 +110,7 @@ Jika Anda mengalami masalah dalam pengiriman OTP, periksa hal-hal berikut:
   ```
 
 #### 4. Masalah Login sebagai Pemilik
+
 - Jika muncul error "Column 'user_id' cannot be null", jalankan script `php fix_auth.php`
 - Jika login gagal meski password benar, jalankan `php fix_owner_role.php`
 
