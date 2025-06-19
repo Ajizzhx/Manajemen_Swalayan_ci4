@@ -17,12 +17,13 @@ rem Check if MySQL service is running (try to connect with empty password)
 echo Memeriksa koneksi MySQL...
 mysql -u root -h localhost -e "SELECT 'Connection successful!'" >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo PERINGATAN: Tidak dapat terhubung ke MySQL.
+    echo.    echo PERINGATAN: Tidak dapat terhubung ke MySQL.
     echo Pastikan MySQL/XAMPP sudah berjalan sebelum melanjutkan.
     echo.
-    set /p continue="Apakah Anda ingin melanjutkan instalasi library saja? (y/n): "
-    if /i "%continue%" NEQ "y" (
+    
+    rem Perbaikan untuk penanganan input y/n
+    choice /c YN /m "Apakah Anda ingin melanjutkan instalasi library saja?"
+    if ERRORLEVEL 2 (
         echo Setup dibatalkan.
         pause
         exit /b 1
