@@ -96,8 +96,6 @@ echo "- QR Code Generator (endroid/qr-code)\n";
 echo "- Barcode Generator (picqer/php-barcode-generator)\n";
 echo "- Excel Library (phpoffice/phpspreadsheet)\n";
 echo "==============================================\n";
-
-echo "\nExecuting database setup script...\n";
 include 'setup_database.php';
 
 ?>

@@ -4,13 +4,12 @@
 
 | Script | Platform | Fungsi | Cara Menggunakan |
 |--------|----------|--------|-----------------|
-| **setup.bat** | Windows | Setup lengkap (library) | Klik dua kali pada file |
-| **setup.sh** | Linux/Mac | Setup lengkap (library) | `bash setup.sh` |
+| **setup.bat** | Windows | Setup lengkap (library + database) | Klik dua kali pada file |
+| **setup.sh** | Linux/Mac | Setup lengkap (library + database) | `bash setup.sh` |
 | **setup_libraries.php** | Semua | Hanya setup library | `php setup_libraries.php` |
-| **setup_database.php** | Semua | Membuat database & tabel | `php setup_database.php` |
-| **setup_db.bat / setup_db.sh** | Windows/Linux | Setup database dengan migrasi CI4 | `setup_db.bat` atau `bash setup_db.sh` |
-| **setup_owner_email.php** | Semua | Mengubah email owner untuk OTP | `php setup_owner_email.php` |
-| **fix_owner_role.php** | Semua | Memperbaiki role owner | `php fix_owner_role.php` |
+| **setup_database.php** | Semua | Hanya setup database | `php setup_database.php` |
+| **setup_owner_email.php** | Semua | Mengubah email pemilik untuk OTP | `php setup_owner_email.php` |
+| **fix_owner_role.php** | Semua | Memperbaiki role pemilik | `php fix_owner_role.php` |
 | **fix_auth.php** | Semua | Memperbaiki masalah user_id pada Auth | `php fix_auth.php` |
 
 ## Langkah-langkah Instalasi (Ringkas)
@@ -19,9 +18,9 @@
 1. Pastikan XAMPP sudah terinstal dan berjalan (Apache & MySQL)
 2. **Windows**: Klik dua kali pada file `setup.bat`  
    **Linux/Mac**: Jalankan perintah `bash setup.sh`
-3. Tunggu hingga proses selesai, sistem akan menginstal semua library yang diperlukan
-4. Jalankan `php setup_database.php` untuk membuat database dan tabel
-5. Buka http://localhost/swalayan_ci4/public dan login
+3. Script akan otomatis menginstal library dan database dalam satu langkah
+4. Buka http://localhost/swalayan_ci4/public dan login
+5. Perbarui email pemilik dengan menjalankan `php setup_owner_email.php`
 
 ## Langkah-langkah Instalasi (Detail)
 
@@ -29,9 +28,9 @@
 1. Pastikan XAMPP sudah terinstal (minimal PHP 8.1, MySQL 5.7)
 2. Pastikan layanan Apache dan MySQL sudah berjalan
 
-### Langkah 1: Instalasi Library
+### Instalasi One-Click (Library + Database)
 
-#### Cara Otomatis
+#### Menggunakan Script All-in-One
 1. **Windows**: Jalankan file `setup.bat` dengan mengklik dua kali, atau gunakan Command Prompt:
    ```
    setup.bat
@@ -42,9 +41,17 @@
    bash setup.sh
    ```
 
-2. Script ini akan otomatis memeriksa keberadaan Composer, mengunduhnya jika perlu, dan menginstal semua library yang diperlukan.
+2. Script ini akan:
+   - Memeriksa keberadaan PHP dan MySQL
+   - Menginstal semua library yang diperlukan (mengunduh Composer jika perlu)
+   - Membuat database dan tabel secara otomatis
+   - Menampilkan langkah selanjutnya yang perlu dilakukan
 
-#### Cara Manual (Menggunakan setup_libraries.php)
+3. Jika MySQL tidak tersedia atau tidak berjalan, script akan memberikan opsi untuk menginstal hanya library saja dan menunda setup database.
+
+### Instalasi Manual (Jika Diperlukan)
+
+#### Langkah 1: Instalasi Library Saja
 1. Buka Command Prompt (cmd) atau PowerShell
 2. Arahkan ke direktori proyek:
    ```
@@ -56,30 +63,13 @@
    ```
 4. Script akan memeriksa keberadaan Composer, mengunduh jika perlu, dan menginstal semua library
 
-#### Cara Manual (Jika Composer Terinstal)
-1. Buka Command Prompt (cmd) atau PowerShell
-2. Arahkan ke direktori proyek:
-   ```
-   cd c:\xampp\htdocs\swalayan_ci4
-   ```
-3. Jalankan perintah Composer:
-   ```
-   composer install
-   ```
-
-### Langkah 2: Instalasi Database
-
-#### Cara 1: Menggunakan Script Database Otomatis
-1. Buka Command Prompt (cmd) atau PowerShell
-2. Arahkan ke direktori proyek dengan perintah:
-   ```
-   cd c:\xampp\htdocs\swalayan_ci4
-   ```
-3. Jalankan script setup database dengan perintah:
+#### Langkah 2: Instalasi Database Saja
+1. Pastikan MySQL sudah berjalan
+2. Jalankan script setup database dengan perintah:
    ```
    php setup_database.php
    ```
-4. Script akan membuat database, tabel, dan user default secara otomatis
+3. Script akan membuat database, tabel, dan user default secara otomatis
 
 #### Cara 2: Menggunakan CodeIgniter Migration
 1. Buka Command Prompt (cmd) atau PowerShell

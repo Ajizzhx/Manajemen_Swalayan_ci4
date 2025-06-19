@@ -13,7 +13,28 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo Menjalankan setup libraries...
+rem Check if MySQL service is running (try to connect with empty password)
+echo Memeriksa koneksi MySQL...
+mysql -u root -h localhost -e "SELECT 'Connection successful!'" >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo PERINGATAN: Tidak dapat terhubung ke MySQL.
+    echo Pastikan MySQL/XAMPP sudah berjalan sebelum melanjutkan.
+    echo.
+    set /p continue="Apakah Anda ingin melanjutkan instalasi library saja? (y/n): "
+    if /i "%continue%" NEQ "y" (
+        echo Setup dibatalkan.
+        pause
+        exit /b 1
+    )
+    set SKIP_DB=1
+) else (
+    set SKIP_DB=0
+)
+
+echo.
+echo LANGKAH 1: Menginstal Library...
+echo.
 php setup_libraries.php
 
 if %ERRORLEVEL% NEQ 0 (
@@ -28,13 +49,43 @@ echo ========================================
 echo   Setup Libraries Berhasil!
 echo ========================================
 echo.
-echo LANGKAH SELANJUTNYA:
+
+if %SKIP_DB%==1 (
+    echo.
+    echo Database setup dilewati karena MySQL tidak tersedia.
+    echo Jalankan 'php setup_database.php' setelah MySQL siap.
+) else (
+    echo.
+    echo LANGKAH 2: Membuat Database...
+    echo.
+    php setup_database.php
+    
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo Setup database gagal. Silakan periksa pesan error di atas.
+        pause
+        exit /b 1
+    )
+    
+    echo.
+    echo ========================================
+    echo   Setup Database Berhasil!
+    echo ========================================
+)
+
 echo.
-echo Jalankan 'php setup_database.php' untuk setup database
-echo Kemudian akses aplikasi melalui: http://localhost/swalayan_ci4/public/
+echo ========================================
+echo   LANGKAH SELANJUTNYA:
+echo ========================================
 echo.
-echo Tip: Pastikan untuk mengubah email pemilik dengan menjalankan:
-echo php setup_owner_email.php
+echo 1. Update email pemilik untuk OTP dengan menjalankan:
+echo    php setup_owner_email.php
+echo.
+echo 2. Konfigurasi email untuk pengiriman OTP di:
+echo    app/Config/Email.php
+echo.
+echo 3. Akses aplikasi melalui: 
+echo    http://localhost/swalayan_ci4/public/
 echo.
 
 pause

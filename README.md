@@ -125,20 +125,19 @@ Namun untuk project **Swalayan CI4** ini, semua konfigurasi dasar **sudah dilaku
 
 ### 3. Instalasi Otomatis (Disarankan)
 
-1. **Windows**: Jalankan file `setup.bat` dengan mengklik dua kali, lalu jalankan `setup_database.php`
+1. **Windows**: Jalankan file `setup.bat` dengan mengklik dua kali
    ```
    setup.bat
-   php setup_database.php
    ```
 2. **Linux/Mac**: Jalankan perintah berikut di terminal
    ```
    bash setup.sh
-   php setup_database.php
    ```
 3. Script-script ini akan otomatis:
-   - Menginstal semua library yang diperlukan (setup.bat/setup.sh)
-   - Membuat dan mengkonfigurasi database (setup_database.php)
-   - Membuat user default (setup_database.php)
+   - Memeriksa keberadaan PHP dan MySQL
+   - Menginstal semua library yang diperlukan
+   - Membuat dan mengkonfigurasi database dan user default
+   - Menampilkan langkah-langkah selanjutnya yang perlu dilakukan
 
 ### 4. Instalasi Manual
 
@@ -290,13 +289,13 @@ Setelah proses setup database selesai, Anda bisa menggunakan akun default beriku
 
 ## Script Setup Tambahan
 
-Beberapa script tambahan yang tersedia untuk mempermudah proses instalasi dan troubleshooting:
+Beberapa script yang tersedia untuk proses instalasi dan troubleshooting:
 
 | Script | Fungsi | Cara Penggunaan |
 |--------|--------|-----------------|
-| **setup.bat / setup.sh** | Setup library otomatis | Klik dua kali atau `bash setup.sh` |
-| **setup_libraries.php** | Menginstal semua library | `php setup_libraries.php` |
-| **setup_database.php** | Membuat database dan tabel | `php setup_database.php` |
+| **setup.bat / setup.sh** | Setup lengkap (library + database) | Klik dua kali atau `bash setup.sh` |
+| **setup_libraries.php** | Hanya menginstal library | `php setup_libraries.php` |
+| **setup_database.php** | Hanya membuat database dan tabel | `php setup_database.php` |
 | **setup_owner_email.php** | Update email pemilik untuk OTP | `php setup_owner_email.php` |
 | **fix_owner_role.php** | Memperbaiki role owner/pemilik | `php fix_owner_role.php` |
 | **fix_auth.php** | Memperbaiki masalah pada Auth | `php fix_auth.php` |
