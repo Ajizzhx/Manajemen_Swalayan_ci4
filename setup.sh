@@ -80,6 +80,9 @@ else
     echo "========================================"
     echo "  Setup Database Berhasil!"
     echo "========================================"
+    
+    # Show the actual owner credentials
+    php show_owner_credentials.php
 fi
 
 echo
@@ -87,7 +90,7 @@ echo "========================================"
 echo "  LANGKAH SELANJUTNYA:"
 echo "========================================"
 echo
-echo "1. Update email pemilik untuk OTP dengan menjalankan:"
+echo "1. Jika perlu update email pemilik untuk OTP, jalankan:"
 echo "   php setup_owner_email.php"
 echo
 echo "2. Konfigurasi email untuk pengiriman OTP di:"

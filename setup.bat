@@ -55,10 +55,11 @@ if %SKIP_DB%==1 (
     echo.
     echo Database setup dilewati karena MySQL tidak tersedia.
     echo Jalankan 'php setup_database.php' setelah MySQL siap.
-) else (
+) else (    echo.
+    echo LANGKAH 2: Membuat Database dan Migrasi...
     echo.
-    echo LANGKAH 2: Membuat Database...
-    echo.
+    
+    rem Create database structure
     php setup_database.php
     
     if %ERRORLEVEL% NEQ 0 (
@@ -68,10 +69,35 @@ if %SKIP_DB%==1 (
         exit /b 1
     )
     
+    rem Run migrations and seeds
     echo.
+    echo Menjalankan migrasi database...
+    php spark migrate
+    
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo Migrasi database gagal. Silakan periksa pesan error di atas.
+        pause
+        exit /b 1
+    )
+    
+    echo.
+    echo Menjalankan seeder...
+    php spark db:seed InitialDataSeeder
+    
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo Database seeder gagal. Silakan periksa pesan error di atas.
+        pause
+        exit /b 1
+    )
+      echo.
     echo ========================================
     echo   Setup Database Berhasil!
     echo ========================================
+    
+    rem Show the actual owner credentials
+    php show_owner_credentials.php
 )
 
 echo.
@@ -79,7 +105,7 @@ echo ========================================
 echo   LANGKAH SELANJUTNYA:
 echo ========================================
 echo.
-echo 1. Update email pemilik untuk OTP dengan menjalankan:
+echo 1. Jika perlu update email pemilik untuk OTP, jalankan:
 echo    php setup_owner_email.php
 echo.
 echo 2. Konfigurasi email untuk pengiriman OTP di:

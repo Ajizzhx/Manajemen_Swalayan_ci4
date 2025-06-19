@@ -23,7 +23,7 @@ echo "    Email: admin@swalayan.com"
 echo "    Password: admin123"
 echo
 echo "  Owner:"
-echo "    Email: owner@swalayan.com"
+echo "    Email: [email yang dimasukkan saat setup]"
 echo "    Password: owner123"
 echo
 echo "  Kasir:"

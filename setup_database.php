@@ -198,7 +198,8 @@ foreach ($tables as $sql) {
 
 if ($success) {
     echo "All tables created successfully!\n";
-      // Prompt user for actual owner email
+    
+    // Create a config file to store the owner email for later use by seeder
     echo "\n\nMasukkan email asli pemilik (owner) untuk menerima kode OTP: ";
     $ownerEmail = '';
     
@@ -211,38 +212,18 @@ if ($success) {
         echo "<p style='color:red;font-weight:bold;'>PENTING: Gunakan halaman profil owner setelah login untuk mengubah email ke alamat email yang valid untuk menerima OTP.</p>";
     }
     
-    // Create default owner user with password 'owner123'
-    $ownerId = uniqid('OWN');
-    $ownerName = 'Pemilik Toko';
-    $ownerPassword = hash('sha256', 'owner123');
-      $insertOwnerSql = "INSERT INTO `karyawan` (`karyawan_id`, `nama`, `email`, `password`, `role`) 
-                       VALUES ('$ownerId', '$ownerName', '$ownerEmail', '$ownerPassword', 'pemilik')";
-                       
-    if ($conn->query($insertOwnerSql) === TRUE) {
-        echo "Default owner user created successfully!\n";
-        echo "Email: $ownerEmail\n";
-        echo "Password: owner123\n";
-        echo "PENTING: Email ini akan digunakan untuk menerima kode OTP saat login sebagai owner.\n";
+    // Store the owner email in a temporary file for the seeder to use
+    if (!empty($ownerEmail)) {
+        $configContent = "<?php\n";
+        $configContent .= "// Auto-generated file - Do not edit manually\n";
+        $configContent .= "return [\n";
+        $configContent .= "    'owner_email' => '" . addslashes($ownerEmail) . "'\n";
+        $configContent .= "];\n";
         
-        // Create default admin user with password 'admin123'
-        $adminId = uniqid('ADM');
-        $adminName = 'Administrator';
-        $adminEmail = 'admin@swalayan.com';
-        $adminPassword = hash('sha256', 'admin123');
-        
-        $insertAdminSql = "INSERT INTO `karyawan` (`karyawan_id`, `nama`, `email`, `password`, `role`) 
-                           VALUES ('$adminId', '$adminName', '$adminEmail', '$adminPassword', 'admin')";
-                           
-        if ($conn->query($insertAdminSql) === TRUE) {
-            echo "Default admin user created successfully!\n";
-            echo "Email: admin@swalayan.com\n";
-            echo "Password: admin123\n";
-        } else {
-            echo "Error creating default admin: " . $conn->error . "\n";
-        }
-    } else {
-        echo "Error creating default owner: " . $conn->error . "\n";
-    }
+        file_put_contents(__DIR__ . '/writable/temp_owner_email.php', $configContent);
+        echo "Owner email saved for the seeder.\n";    }
+    
+    echo "Database setup complete. Default users will be created by the seeder.\n";
 }
 
 // Close connection
