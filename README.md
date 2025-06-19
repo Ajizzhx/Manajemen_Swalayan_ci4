@@ -10,6 +10,21 @@ Untuk panduan lengkap instalasi dan konfigurasi, lihat file-file berikut:
 - [PANDUAN_INSTALASI.md](PANDUAN_INSTALASI.md) - Panduan instalasi detil
 - [PANDUAN_SETUP_EMAIL_OTP.md](PANDUAN_SETUP_EMAIL_OTP.md) - Cara mengkonfigurasi email OTP
 
+## Daftar Isi
+
+1. [Fitur Utama](#fitur-utama)
+2. [Basis Framework](#basis-framework)
+3. [Tentang CodeIgniter 4 dan Instalasi Framework](#tentang-codeigniter-4-dan-instalasi-framework)
+4. [Langkah Instalasi](#langkah-instalasi)
+5. [Akses Login Default](#akses-login-default)
+6. [Script Setup Tambahan](#script-setup-tambahan)
+7. [Struktur Database](#struktur-database)
+8. [Penggunaan Aplikasi](#penggunaan-aplikasi)
+9. [Konfigurasi Server dan Routing](#konfigurasi-server-dan-routing)
+10. [Kustomisasi dan Pengembangan Lanjutan](#kustomisasi-dan-pengembangan-lanjutan)
+11. [Troubleshooting](#troubleshooting)
+12. [Persyaratan Sistem](#persyaratan-sistem)
+
 ## Fitur Utama
 
 - Manajemen produk dengan dukungan barcode
@@ -28,6 +43,69 @@ Aplikasi ini dibangun di atas framework CodeIgniter 4 yang light, fast, flexible
 Untuk informasi lebih lanjut tentang framework, kunjungi [situs resmi CodeIgniter](https://codeigniter.com).
 
 Anda juga dapat membaca [user guide](https://codeigniter.com/user_guide/) untuk informasi lebih detail tentang framework yang digunakan.
+
+## Tentang CodeIgniter 4 dan Instalasi Framework
+
+### Apa itu CodeIgniter 4?
+
+CodeIgniter 4 adalah framework PHP yang ringan, cepat, dan memiliki jejak kode yang minimal. Framework ini dirancang untuk pengembang yang membutuhkan toolkit sederhana dan elegan untuk membuat aplikasi web full-featured.
+
+### Keunggulan CodeIgniter 4:
+
+1. **Performa Tinggi** - Lebih cepat dibandingkan framework PHP lainnya
+2. **Jejak Memori Rendah** - Hanya menggunakan resource yang dibutuhkan
+3. **Dokumentasi Lengkap** - Panduan yang terstruktur dan mudah diikuti
+4. **Minimal Konfigurasi** - Zero configuration, siap digunakan segera
+5. **MVC Architecture** - Pemisahan logic aplikasi yang baik
+
+### Struktur Aplikasi CodeIgniter 4
+
+```
+swalayan_ci4/
+├── app/                    # Folder aplikasi utama
+│   ├── Config/             # Konfigurasi aplikasi
+│   ├── Controllers/        # Controller aplikasi
+│   ├── Models/             # Model untuk database
+│   ├── Views/              # Template view/tampilan
+│   ├── Database/           # Migrasi dan seeder
+│   ├── Filters/            # Filter untuk request
+│   ├── Helpers/            # Helper functions
+│   └── ...
+├── public/                 # Webroot untuk deployment
+│   ├── index.php           # Entry point aplikasi
+│   ├── Assets/             # Asset statis (JS, CSS, img)
+│   └── ...
+├── writable/               # Folder untuk file temporary dan logs
+├── vendor/                 # Library pihak ketiga (Composer)
+├── spark                   # CLI tool CodeIgniter
+└── composer.json           # Konfigurasi dependensi
+```
+
+### Instalasi Framework CI4
+
+Biasanya, untuk instalasi framework CI4 dari awal, langkah-langkahnya adalah:
+
+1. **Instalasi via Composer**:
+   ```
+   composer create-project codeigniter4/appstarter project-name
+   ```
+
+2. **Konfigurasi Environment**:
+   - Salin file `env` menjadi `.env`
+   - Set `CI_ENVIRONMENT = development` untuk debugging
+   - Konfigurasi database dan preferensi aplikasi lainnya
+
+3. **Jalankan Server Pengembangan**:
+   ```
+   php spark serve
+   ```
+
+4. **Buat Database dan Migrasi**:
+   ```
+   php spark migrate
+   ```
+
+Namun untuk project **Swalayan CI4** ini, semua konfigurasi dasar **sudah dilakukan** dan Anda cukup mengikuti langkah instalasi yang dijelaskan di bagian selanjutnya.
 
 ## Langkah Instalasi
 
@@ -89,7 +167,9 @@ Anda juga dapat membaca [user guide](https://codeigniter.com/user_guide/) untuk 
    ```
    Masukkan email aktif yang bisa menerima OTP
 
-### 3. Konfigurasi Database
+### 3. Konfigurasi Database dan Environment
+
+Swalayan CI4 menggunakan file konfigurasi lingkungan (environment) CodeIgniter 4 untuk menyimpan setting yang sensitif seperti kredensial database.
 
 1. Salin file `env` menjadi `.env`
    ```
@@ -100,7 +180,16 @@ Anda juga dapat membaca [user guide](https://codeigniter.com/user_guide/) untuk 
    copy env .env
    ```
 
-2. Edit file `.env` dan sesuaikan konfigurasi database:
+2. Edit file `.env` dan sesuaikan konfigurasi berikut:
+
+   **Konfigurasi Environment**:
+   ```
+   # Setel ke 'development' untuk melihat detail error
+   # Setel ke 'production' untuk deployment live
+   CI_ENVIRONMENT = development
+   ```
+
+   **Konfigurasi Database**:
    ```
    database.default.hostname = localhost
    database.default.database = swalayan_db
@@ -109,6 +198,17 @@ Anda juga dapat membaca [user guide](https://codeigniter.com/user_guide/) untuk 
    database.default.DBDriver = MySQLi
    database.default.port = 3306
    ```
+
+   **Konfigurasi App URL (opsional)**:
+   ```
+   app.baseURL = 'http://localhost/swalayan_ci4/public/'
+   ```
+
+3. Jika Anda ingin mengubah nama database, pastikan untuk mengubah:
+   - Konfigurasi di file `.env`
+   - Parameter di `setup_database.php` (jika menggunakan script setup database)
+
+4. File `.env` sudah ditambahkan ke `.gitignore` sehingga aman untuk menyimpan kredensial sensitif
 
 ### 4. Inisialisasi Database
 
@@ -215,103 +315,85 @@ Sistem menggunakan beberapa tabel utama:
 8. **expenses** - Catatan pengeluaran
 9. **audit_logs** - Log aktivitas sistem untuk keamanan dan monitoring
 
-## Penggunaan Aplikasi
+## Kustomisasi dan Pengembangan Lanjutan
 
-### Halaman Login
-- Masukkan email dan password yang telah terdaftar
-- Untuk akun pemilik, sistem akan meminta verifikasi OTP yang dikirimkan ke email
-- Sistem akan mengarahkan ke dashboard sesuai role pengguna
+### Struktur MVC CodeIgniter 4
 
-### Dashboard Pemilik
-- Akses penuh ke seluruh sistem termasuk laporan keuangan dan analitik
-- Approval penghapusan transaksi
-- Monitoring kinerja karyawan
-- Pengaturan toko dan konfigurasi sistem
+Aplikasi Swalayan CI4 mengikuti pola MVC (Model-View-Controller) sesuai standar CodeIgniter 4:
 
-### Dashboard Admin
-- Akses ke fitur-fitur utama aplikasi
-- Manajemen produk, supplier, dan kategori
-- Input dan edit data inventaris
-- Laporan penjualan
+1. **Models** (`app/Models/`): Berisi logika data dan interaksi dengan database
+   - Contoh: `ProdukModel.php`, `TransaksiModel.php`
+   - Menggunakan Entity classes untuk representasi data yang lebih OOP
 
-### Dashboard Kasir
-- Fokus pada transaksi penjualan
-- Input data pelanggan baru
-- Proses pembayaran dengan berbagai metode
-- Cetak struk
+2. **Views** (`app/Views/`): Template untuk antarmuka pengguna
+   - Menggunakan template engine bawaan CI4
+   - Template utama di `Views/Backend/`
+   - Berisi partial views yang reusable
 
-## Panduan Pengaturan Email OTP
+3. **Controllers** (`app/Controllers/`): Menangani request HTTP dan alur aplikasi
+   - Controllers utama di folder `Admin/`, `Kasir/`, dll.
+   - Base controller di `BaseController.php`
 
-Untuk mengkonfigurasi sistem email OTP, ikuti langkah-langkah di file `PANDUAN_SETUP_EMAIL_OTP.md` yang berisi:
-1. Cara membuat App Password di Gmail
-2. Konfigurasi SMTP di `app/Config/Email.php`
-3. Update email pemilik untuk menerima OTP
-4. Troubleshooting masalah pengiriman OTP
+### Cara Menambahkan Fitur Baru
 
-## Troubleshooting
+1. **Menambahkan Tabel Database**:
+   - Buat file migrasi baru: `php spark make:migration NamaTable`
+   - Edit file migrasi di `app/Database/Migrations/`
+   - Jalankan migrasi: `php spark migrate`
 
-### Login & OTP Issues
-- Jika tidak menerima email OTP saat login sebagai pemilik:
-  1. Pastikan email pemilik sudah diupdate (`php setup_owner_email.php`)
-  2. Pastikan konfigurasi SMTP di `app/Config/Email.php` sudah benar
-  3. Cek folder spam di email pemilik
+2. **Menambahkan Model**:
+   - Buat model baru: `php spark make:model NamaModel`
+   - Define relasi, validasi, dan metode CRUD
 
-- Jika muncul error "Column 'user_id' cannot be null" saat login:
-  ```
-  php fix_auth.php
-  ```
+3. **Menambahkan Controller**:
+   - Buat controller baru: `php spark make:controller NamaController`
+   - Extend dari `BaseController` dan implement methods
 
-- Jika login gagal meski password benar:
-  ```
-  php fix_owner_role.php
-  ```
+4. **Menambahkan View**:
+   - Buat file template baru di `app/Views/`
+   - Gunakan layout yang sudah ada sebagai referensi
 
-### Issue Database
-- Pastikan konfigurasi database pada file `.env` sudah benar
-- Pastikan MySQL sudah berjalan
-- Jika gagal migrasi, coba hapus database dan ulangi proses instalasi
-  ```
-  php setup_database.php
-  ```
+### Contoh Command CLI CodeIgniter
 
-### Issue Permissions
-- Pastikan direktori `writable` pada CodeIgniter memiliki izin tulis yang sesuai
-- Folder writable harus bisa diakses (readable dan writeable) oleh web server
+```bash
+# Membuat controller baru
+php spark make:controller Laporan
 
-### Error 500
-- Periksa log error di `writable/logs/`
-- Aktifkan mode development pada `.env` dengan `CI_ENVIRONMENT = development`
+# Membuat model baru
+php spark make:model LaporanModel
 
-Untuk panduan lengkap troubleshooting, lihat file `PANDUAN_INSTALASI.md`
+# Membuat filter autentikasi
+php spark make:filter Auth
 
-## Library dan Dependencies
+# Membuat entity
+php spark make:entity Produk
 
-Aplikasi ini menggunakan beberapa library eksternal untuk mendukung fungsionalitasnya:
+# Melihat daftar rute
+php spark routes
 
-1. **endroid/qr-code**
-   - Fungsi: Menghasilkan QR code untuk produk dan transaksi
-   - Versi: ^6.0
+# Membuat migration
+php spark make:migration CreateLaporanTable
 
-2. **picqer/php-barcode-generator**
-   - Fungsi: Menghasilkan barcode untuk produk
-   - Versi: ^3.2
+# Menjalankan database seeder
+php spark db:seed NamaSeeder
+```
 
-3. **phpoffice/phpspreadsheet**
-   - Fungsi: Menghasilkan file Excel untuk laporan
-   - Versi: ^4.2
+### Tips Pengembangan CI4
 
-Semua library di atas akan otomatis terinstal saat menjalankan `setup.bat`, `setup.sh`, atau `php setup_libraries.php`.
+1. **Lingkungan Development**:
+   - Set `CI_ENVIRONMENT = development` di `.env`
+   - Aktifkan error display untuk debugging
 
-## Persyaratan Sistem
+2. **Debugging**:
+   - Gunakan fungsi `dd()` atau `var_dump()` untuk debugging
+   - Periksa logs di `writable/logs/`
+   - Aktifkan toolbar debugging CI4 di `.env`
 
-- PHP 8.1 atau lebih tinggi
-- MySQL 5.7 atau lebih tinggi
-- Ekstensi PHP:
-  - intl
-  - mbstring
-  - json
-  - mysqlnd
-  - xml
-  - gd
-  - zip
-- Composer (opsional - akan diunduh otomatis oleh script setup jika belum ada)
+3. **Keamanan**:
+   - Validasi semua input user dengan `validation` library
+   - Gunakan prepared statements untuk query database
+   - Implementasi CSRF protection
+
+4. **Performance**:
+   - Aktifkan caching jika diperlukan
+   - Gunakan query builder untuk operasi database kompleks
