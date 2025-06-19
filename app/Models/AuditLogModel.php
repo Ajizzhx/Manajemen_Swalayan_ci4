@@ -11,7 +11,6 @@ class AuditLogModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'object'; 
     protected $useSoftDeletes   = false;
-
    
     protected $allowedFields    = [
         'user_id',
@@ -27,6 +26,33 @@ class AuditLogModel extends Model
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at'; 
     protected $updatedField  = ''; 
-
     
-}
+    /**
+     * Log activity safely with error handling for foreign key constraint
+     */
+    public function logActivity($userId, $action, $description = '')
+    {
+        try {
+            // Check first if user exists
+            $karyawanModel = new \App\Models\KaryawanModel();
+            $userExists = $karyawanModel->find($userId);
+            
+            if (!$userExists) {
+                // Skip logging if the user doesn't exist to avoid foreign key error
+                return false;
+            }
+            
+            return $this->insert([
+                'user_id' => $userId,
+                'action' => $action,
+                'description' => $description,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+            ]);
+        } catch (\Exception $e) {
+            // Log the error but don't let it break the application
+            log_message('error', 'Failed to log activity: ' . $e->getMessage());
+            return false;
+        }
+    }
+    }

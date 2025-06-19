@@ -26,12 +26,12 @@ class MonitoringModel extends Model
     }    public function getStockStatus()
     {
         $db = \Config\Database::connect();
-        
-        // Get basic product data first
+          // Get basic product data first
         $products = $db->table('produk')
             ->select('
-                produk.kode_barcode as kode_produk, 
-                produk.nama as nama_produk,
+                produk.*,
+                produk.kode_barcode, 
+                produk.nama,
                 produk.stok,
                 kategori.nama as nama_kategori
             ')
@@ -95,7 +95,7 @@ class MonitoringModel extends Model
     {
         $db = \Config\Database::connect();
         return $db->table('produk')
-            ->select('produk.*, kategori.nama as nama_kategori')
+            ->select('produk.*, produk.kode_barcode as kode_produk, kategori.nama as nama_kategori')
             ->join('kategori', 'kategori.kategori_id = produk.kategori_id')
             ->where('produk.stok <=', $threshold)
             ->where('produk.is_deleted', 0)

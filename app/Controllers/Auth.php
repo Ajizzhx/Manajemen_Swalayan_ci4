@@ -9,27 +9,32 @@ class Auth extends BaseController
 {
     protected $session;
     protected $karyawanModel;
-    protected $auditLogModel;    protected function sendOTPEmail($email, $otp, $karyawanId) {
+    protected $auditLogModel;
+      protected function sendOTPEmail($email, $otp, $karyawanId) {
         $emailService = \Config\Services::email();
-        log_message('info', 'Attempting to send OTP email to: ' . $email);
+        log_message('info', 'Attempting to send OTP email to owner: ' . $email);
         
         try {
-            // Initialize email service with explicit configuration
+            // Initialize email service with explicit configuration from config file
             $emailConfig = config('Email');
+            
+            // Tambahkan log informasi konfigurasi (tanpa password untuk keamanan)
+            log_message('info', 'Using SMTP configuration: Host=' . $emailConfig->SMTPHost . ', User=' . $emailConfig->SMTPUser . ', Port=' . $emailConfig->SMTPPort);
+            
             $emailService->initialize([
                 'protocol' => 'smtp',
                 'SMTPHost' => 'smtp.gmail.com',
-                'SMTPUser' => $emailConfig->SMTPUser,
-                'SMTPPass' => $emailConfig->SMTPPass,
+                'SMTPUser' => $emailConfig->SMTPUser, 
+                'SMTPPass' => $emailConfig->SMTPPass, 
                 'SMTPPort' => 465,
                 'SMTPCrypto' => 'ssl',
                 'mailType' => 'html',
                 'charset' => 'utf-8',
                 'validate' => true,
-                'SMTPTimeout' => 30,
-                'SMTPKeepAlive' => false,
+                'SMTPTimeout' => 60,
+                'SMTPKeepAlive' => true,
                 'newline' => "\r\n",
-                'SMTPDebug' => 2
+                'SMTPDebug' => 0 // Ubah ke 2 untuk debugging detail
             ]);
             
             log_message('info', 'Email configuration initialized');
@@ -175,9 +180,7 @@ class Auth extends BaseController
 
         
         $karyawan = $this->karyawanModel->withDeleted()
-                                     ->where('email', $email)->where('is_deleted', 0)->first();
-
-        if ($karyawan) {
+                                     ->where('email', $email)->where('is_deleted', 0)->first();        if ($karyawan) {
             if (hash('sha256', $password) === $karyawan['password']) {
                 $sessData = [
                     'karyawan_id' => $karyawan['karyawan_id'],
@@ -185,27 +188,33 @@ class Auth extends BaseController
                     'email'       => $karyawan['email'],
                     'role'        => $karyawan['role'],
                     'isLoggedIn'  => TRUE
-                ];
-                // Update last_login
-                $this->karyawanModel->update($karyawan['karyawan_id'], ['last_login' => date('Y-m-d H:i:s')]);
-
-                // Jika role pemilik, lakukan 2FA OTP
-                if ($karyawan['role'] == 'pemilik') {
+                ];                // Update last_login
+                $this->karyawanModel->update($karyawan['karyawan_id'], ['last_login' => date('Y-m-d H:i:s')]);                // Jika role pemilik, lakukan 2FA OTP
+                if ($karyawan['role'] == 'pemilik' || $karyawan['role'] == 'owner') {
                     // Generate OTP 6 digit
                     $otp = random_int(100000, 999999);
+                    
+                    // Pastikan menggunakan email owner yang sebenarnya
+                    $ownerEmail = $karyawan['email'];
+                    
                     $otpData = [
                         'otp_code' => $otp,
                         'otp_expires' => time() + 300, // 5 menit
-                        'email' => $karyawan['email'],
+                        'email' => $ownerEmail,
                         'karyawan_id' => $karyawan['karyawan_id'],
                     ];
                     $this->session->set('2fa_karyawan_data', $otpData);
-                    // Kirim OTP ke email
-                    if (!$this->sendOTPEmail($karyawan['email'], $otp, $karyawan['karyawan_id'])) {
-                        return redirect()->back()->with('error', 'Gagal mengirim kode OTP. Silakan coba lagi.');
+                    
+                    // Log untuk debugging
+                    log_message('info', 'Sending OTP to owner: ' . $ownerEmail);
+                    
+                    // Kirim OTP ke email owner
+                    if (!$this->sendOTPEmail($ownerEmail, $otp, $karyawan['karyawan_id'])) {
+                        return redirect()->back()->with('error', 'Gagal mengirim kode OTP ke ' . $ownerEmail . '. Silakan coba lagi atau hubungi administrator untuk memastikan email terkonfigurasi dengan benar.');
                     }
+                    
                     // Redirect ke halaman verifikasi OTP
-                    return redirect()->to(site_url('auth/verify-otp'));
+                    return redirect()->to(site_url('auth/verify-otp'))->with('info', 'Kode OTP telah dikirimkan ke email ' . $ownerEmail);
                 }
                 $this->session->set($sessData);
                  $auditLogModel = new AuditLogModel(); 
@@ -220,8 +229,7 @@ class Auth extends BaseController
                 } elseif ($karyawan['role'] == 'kasir') {
                     return redirect()->to('/kasir/dashboard')->with('success', 'Login berhasil! Selamat datang, Kasir.');
                 } elseif ($karyawan['role'] == 'kepala_toko') {
-                    return redirect()->to('/admin/dashboard')->with('success', 'Login berhasil! Selamat datang, Kepala Toko.');
-                } elseif ($karyawan['role'] == 'pemilik') { 
+                    return redirect()->to('/admin/dashboard')->with('success', 'Login berhasil! Selamat datang, Kepala Toko.');                } elseif ($karyawan['role'] == 'owner') { 
                     return redirect()->to('/admin/dashboard')->with('success', 'Login berhasil! Selamat datang, Pemilik.');
                 } else {
                      
@@ -237,14 +245,17 @@ class Auth extends BaseController
                 }
             } else {
                 
-                $auditLogModel = new AuditLogModel(); 
-                $auditLogModel->insert([
-                    'user_id' => $karyawan['karyawan_id'],
-                    'action' => 'LOGIN_FAILED',
-                    'description' => 'Failed login attempt for user ' . $email . ' (wrong password).',
-                    'ip_address' => $this->request->getIPAddress(),
-                    'user_agent' => $this->request->getUserAgent()->getAgentString(),
-                ]);
+                $auditLogModel = new AuditLogModel();                // Use safer method to log failed login
+                try {
+                    $auditLogModel->logActivity(
+                        $karyawan['karyawan_id'],
+                        'LOGIN_FAILED',
+                        'Failed login attempt for user ' . $email . ' (wrong password).'
+                    );
+                } catch (\Exception $e) {
+                    log_message('error', 'Failed to log login attempt: ' . $e->getMessage());
+                }
+                
                 $referrerPath = previous_url(true)->getPath();
                 $loginRedirectUrl = site_url('login'); // Default
                 if (strpos($referrerPath, 'kasir-login') !== false) {
@@ -252,17 +263,23 @@ class Auth extends BaseController
                 } elseif (strpos($referrerPath, 'admin-login') !== false) {
                     $loginRedirectUrl = site_url('admin-login');
                 }
-                return redirect()->to($loginRedirectUrl)->withInput()->with('error', 'Password salah.');
+                return redirect()->to($loginRedirectUrl)
+                    ->withInput()
+                    ->with('error', 'Password yang Anda masukkan salah. Mohon periksa kembali email dan password Anda.');
             }
         } else {
+              // Use safer method to log failed login
+            try {
+                $auditLogModel = new AuditLogModel();
+                $auditLogModel->logActivity(
+                    null,
+                    'LOGIN_FAILED',
+                    'Failed login attempt: Email not found or account inactive - ' . $email
+                );
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to log login attempt: ' . $e->getMessage());
+            }
             
-            $auditLogModel = new AuditLogModel();
-            $auditLogModel->insert([
-                'action' => 'LOGIN_FAILED',
-                'description' => 'Failed login attempt: Email not found or account inactive - ' . $email,
-                'ip_address' => $this->request->getIPAddress(),
-                'user_agent' => $this->request->getUserAgent()->getAgentString(),
-            ]);
             $referrerPath = previous_url(true)->getPath();
             $loginRedirectUrl = site_url('login'); // Default
             if (strpos($referrerPath, 'kasir-login') !== false) {
@@ -270,7 +287,9 @@ class Auth extends BaseController
             } elseif (strpos($referrerPath, 'admin-login') !== false) {
                 $loginRedirectUrl = site_url('admin-login');
             }
-            return redirect()->to($loginRedirectUrl)->withInput()->with('error', 'Email tidak ditemukan atau akun tidak aktif.');
+            return redirect()->to($loginRedirectUrl)
+                ->withInput()
+                ->with('error', 'Akun dengan email tersebut tidak ditemukan atau tidak aktif. Mohon periksa kembali email Anda atau hubungi administrator.');
         }
     }
 
