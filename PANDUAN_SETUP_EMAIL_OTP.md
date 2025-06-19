@@ -48,7 +48,7 @@ public string $fromName = 'Swalayan POS - Verifikasi Pemilik';
 
 ### 4. Mengubah Email Pemilik untuk Menerima OTP
 
-Anda memiliki TIGA cara untuk mengubah email pemilik:
+Anda memiliki DUA cara untuk mengubah email pemilik:
 
 #### Cara 1: Menggunakan Script Khusus (TERMUDAH)
 1. Jalankan script berikut di command line:
@@ -59,15 +59,8 @@ Anda memiliki TIGA cara untuk mengubah email pemilik:
 2. Masukkan email aktif yang ingin menerima kode OTP
 3. Script akan otomatis mengupdate email di database
 
-#### Cara 2: Mengubah Di Aplikasi Web
-1. Login sebagai pemilik ke dalam sistem 
-   (Jika belum bisa login karena masalah OTP, gunakan akun admin dulu)
-2. Klik menu "Area Pemilik" > "Profil & Email OTP"
-3. Pada form yang tersedia, masukkan email aktif yang ingin digunakan menerima OTP
-4. Klik "Simpan Perubahan"
-5. Email baru Anda akan langsung digunakan untuk pengiriman OTP pada login berikutnya
 
-#### Cara 3: Mengubah Melalui Database (phpMyAdmin)
+#### Cara 2: Mengubah Melalui Database (phpMyAdmin)
 1. Buka phpMyAdmin (http://localhost/phpmyadmin)
 2. Pilih database `swalayan_db`
 3. Buka tabel `karyawan`

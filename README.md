@@ -4,6 +4,12 @@
 
 Swalayan CI4 adalah sistem Point of Sale (POS) berbasis web yang dibangun menggunakan framework CodeIgniter 4. Aplikasi ini dirancang untuk membantu manajemen toko/swalayan dalam mengelola inventaris produk, transaksi penjualan, pelanggan, supplier, dan laporan keuangan.
 
+## Panduan Lengkap
+
+Untuk panduan lengkap instalasi dan konfigurasi, lihat file-file berikut:
+- [PANDUAN_INSTALASI.md](PANDUAN_INSTALASI.md) - Panduan instalasi detil
+- [PANDUAN_SETUP_EMAIL_OTP.md](PANDUAN_SETUP_EMAIL_OTP.md) - Cara mengkonfigurasi email OTP
+
 ## Fitur Utama
 
 - Manajemen produk dengan dukungan barcode
@@ -41,12 +47,20 @@ Anda juga dapat membaca [user guide](https://codeigniter.com/user_guide/) untuk 
 
 ### 3. Instalasi Otomatis (Disarankan)
 
-1. **Windows**: Cukup jalankan file `setup.bat` dengan klik dua kali
-2. **Linux/Mac**: Jalankan perintah `bash setup.sh` di terminal
-3. Script akan otomatis:
-   - Menginstal semua library yang diperlukan
-   - Membuat dan mengkonfigurasi database
-   - Membuat user default
+1. **Windows**: Jalankan file `setup.bat` dengan mengklik dua kali, lalu jalankan `setup_database.php`
+   ```
+   setup.bat
+   php setup_database.php
+   ```
+2. **Linux/Mac**: Jalankan perintah berikut di terminal
+   ```
+   bash setup.sh
+   php setup_database.php
+   ```
+3. Script-script ini akan otomatis:
+   - Menginstal semua library yang diperlukan (setup.bat/setup.sh)
+   - Membuat dan mengkonfigurasi database (setup_database.php)
+   - Membuat user default (setup_database.php)
 
 ### 4. Instalasi Manual
 
@@ -68,6 +82,12 @@ Anda juga dapat membaca [user guide](https://codeigniter.com/user_guide/) untuk 
    ```
    php setup_database.php
    ```
+
+4. Update email pemilik untuk OTP dengan:
+   ```
+   php setup_owner_email.php
+   ```
+   Masukkan email aktif yang bisa menerima OTP
 
 ### 3. Konfigurasi Database
 
@@ -151,70 +171,118 @@ Anda juga dapat membaca [user guide](https://codeigniter.com/user_guide/) untuk 
 
 Setelah proses setup database selesai, Anda bisa menggunakan akun default berikut untuk login:
 
-### Owner (Pemilik):
-- Email: owner@swalayan.com
+### Pemilik (Owner):
+- Email: owner@swalayan.com (sebaiknya update dengan email aktif Anda menggunakan script `setup_owner_email.php`)
 - Password: owner123
-
-Sebagai pemilik, Anda dapat menambahkan karyawan baru melalui menu Manajemen Karyawan.
+- **PENTING**: Login sebagai pemilik memerlukan verifikasi OTP yang dikirim ke email. Anda perlu menjalankan `setup_owner_email.php` terlebih dahulu untuk update email pemilik, dan mengkonfigurasi pengiriman email OTP seperti dijelaskan di `PANDUAN_SETUP_EMAIL_OTP.md`
 
 ### Akun lain yang tersedia:
 
 **Admin:**
 - Email: admin@swalayan.com
 - Password: admin123
+- Memiliki akses ke manajemen produk, supplier, kategori, dan transaksi
 
 **Kasir:**
 - Email: kasir@swalayan.com
 - Password: kasir123
+- Memiliki akses terbatas hanya untuk transaksi penjualan
+
+## Script Setup Tambahan
+
+Beberapa script tambahan yang tersedia untuk mempermudah proses instalasi dan troubleshooting:
+
+| Script | Fungsi | Cara Penggunaan |
+|--------|--------|-----------------|
+| **setup.bat / setup.sh** | Setup library otomatis | Klik dua kali atau `bash setup.sh` |
+| **setup_libraries.php** | Menginstal semua library | `php setup_libraries.php` |
+| **setup_database.php** | Membuat database dan tabel | `php setup_database.php` |
+| **setup_owner_email.php** | Update email pemilik untuk OTP | `php setup_owner_email.php` |
+| **fix_owner_role.php** | Memperbaiki role owner/pemilik | `php fix_owner_role.php` |
+| **fix_auth.php** | Memperbaiki masalah pada Auth | `php fix_auth.php` |
 
 ## Struktur Database
 
 Sistem menggunakan beberapa tabel utama:
 
-1. **karyawan** - Manajemen karyawan/staff
+1. **karyawan** - Manajemen karyawan/staff dengan berbagai role (pemilik, admin, kasir)
 2. **transaksi** - Data transaksi penjualan
 3. **detail_transaksi** - Detail item per transaksi
-4. **produk** - Inventaris produk
+4. **produk** - Inventaris produk dengan dukungan barcode
 5. **kategori** - Kategori produk
 6. **supplier** - Data supplier
-7. **pelanggan** - Data pelanggan
+7. **pelanggan** - Data pelanggan dengan sistem poin loyalitas
 8. **expenses** - Catatan pengeluaran
-9. **audit_logs** - Log aktivitas sistem
+9. **audit_logs** - Log aktivitas sistem untuk keamanan dan monitoring
 
 ## Penggunaan Aplikasi
 
 ### Halaman Login
 - Masukkan email dan password yang telah terdaftar
+- Untuk akun pemilik, sistem akan meminta verifikasi OTP yang dikirimkan ke email
 - Sistem akan mengarahkan ke dashboard sesuai role pengguna
 
+### Dashboard Pemilik
+- Akses penuh ke seluruh sistem termasuk laporan keuangan dan analitik
+- Approval penghapusan transaksi
+- Monitoring kinerja karyawan
+- Pengaturan toko dan konfigurasi sistem
+
 ### Dashboard Admin
-- Akses penuh ke seluruh fitur aplikasi
-- Manajemen karyawan, produk, supplier, dan kategori
-- Laporan penjualan dan keuangan
+- Akses ke fitur-fitur utama aplikasi
+- Manajemen produk, supplier, dan kategori
+- Input dan edit data inventaris
+- Laporan penjualan
 
 ### Dashboard Kasir
 - Fokus pada transaksi penjualan
 - Input data pelanggan baru
-- Proses pembayaran
+- Proses pembayaran dengan berbagai metode
+- Cetak struk
 
-### Dashboard Owner
-- Fokus pada laporan dan analitik
-- Approval penghapusan transaksi
-- Monitoring kinerja kasir
+## Panduan Pengaturan Email OTP
+
+Untuk mengkonfigurasi sistem email OTP, ikuti langkah-langkah di file `PANDUAN_SETUP_EMAIL_OTP.md` yang berisi:
+1. Cara membuat App Password di Gmail
+2. Konfigurasi SMTP di `app/Config/Email.php`
+3. Update email pemilik untuk menerima OTP
+4. Troubleshooting masalah pengiriman OTP
 
 ## Troubleshooting
+
+### Login & OTP Issues
+- Jika tidak menerima email OTP saat login sebagai pemilik:
+  1. Pastikan email pemilik sudah diupdate (`php setup_owner_email.php`)
+  2. Pastikan konfigurasi SMTP di `app/Config/Email.php` sudah benar
+  3. Cek folder spam di email pemilik
+
+- Jika muncul error "Column 'user_id' cannot be null" saat login:
+  ```
+  php fix_auth.php
+  ```
+
+- Jika login gagal meski password benar:
+  ```
+  php fix_owner_role.php
+  ```
 
 ### Issue Database
 - Pastikan konfigurasi database pada file `.env` sudah benar
 - Pastikan MySQL sudah berjalan
 - Jika gagal migrasi, coba hapus database dan ulangi proses instalasi
+  ```
+  php setup_database.php
+  ```
 
 ### Issue Permissions
 - Pastikan direktori `writable` pada CodeIgniter memiliki izin tulis yang sesuai
+- Folder writable harus bisa diakses (readable dan writeable) oleh web server
 
 ### Error 500
 - Periksa log error di `writable/logs/`
 - Aktifkan mode development pada `.env` dengan `CI_ENVIRONMENT = development`
+
+Untuk panduan lengkap troubleshooting, lihat file `PANDUAN_INSTALASI.md`
 
 ## Library dan Dependencies
 
@@ -246,4 +314,4 @@ Semua library di atas akan otomatis terinstal saat menjalankan `setup.bat`, `set
   - xml
   - gd
   - zip
-- Composer (jika instalasi manual)
+- Composer (opsional - akan diunduh otomatis oleh script setup jika belum ada)
