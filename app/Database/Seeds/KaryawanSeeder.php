@@ -14,20 +14,39 @@ class KaryawanSeeder extends Seeder
             ->get()
             ->getRow();
             
-        if (!$existingOwner) {
-            $ownerEmail = 'owner@swalayan.com';
+        if (!$existingOwner) {            $ownerEmail = 'owner@swalayan.com';
             
-            // Try to read email from temp file created by setup_database.php
-            $tempFile = ROOTPATH . 'writable/temp_owner_email.php';
-            if (file_exists($tempFile)) {
-                $config = include $tempFile;
-                if (isset($config['owner_email']) && !empty($config['owner_email'])) {
-                    $ownerEmail = $config['owner_email'];
-                    echo "Menggunakan email owner dari pengaturan sebelumnya: $ownerEmail\n";
-                    // Delete the temp file after using it
-                    @unlink($tempFile);
+            // Lokasi tempat file sementara mungkin disimpan
+            $tempLocations = [
+                ROOTPATH . 'writable/temp_owner_email.php',  // Lokasi utama
+                ROOTPATH . 'temp_owner_email.php',           // Lokasi alternatif
+                dirname(ROOTPATH) . '/temp_owner_email.php', // Lokasi alternatif lain
+            ];
+            
+            $emailFound = false;
+            
+            // Periksa semua kemungkinan lokasi
+            foreach ($tempLocations as $tempFile) {
+                if (file_exists($tempFile)) {
+                    try {
+                        $config = include $tempFile;
+                        if (isset($config['owner_email']) && !empty($config['owner_email'])) {
+                            $ownerEmail = $config['owner_email'];
+                            echo "Menggunakan email owner dari pengaturan sebelumnya: $ownerEmail\n";
+                            $emailFound = true;
+                            
+                            // Hapus file setelah digunakan
+                            @unlink($tempFile);
+                            break;
+                        }
+                    } catch (\Throwable $e) {
+                        echo "Error membaca file email: " . $e->getMessage() . "\n";
+                    }
                 }
-            } else {
+            }
+            
+            // Jika tidak ada file email, minta input
+            if (!$emailFound) {
                 echo "\n\nMasukkan email asli pemilik (owner) untuk menerima kode OTP (biarkan kosong untuk menggunakan default): ";
                 // Get input from command line
                 $handle = fopen("php://stdin", "r");

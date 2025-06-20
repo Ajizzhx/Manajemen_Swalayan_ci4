@@ -219,9 +219,27 @@ if ($success) {
         $configContent .= "return [\n";
         $configContent .= "    'owner_email' => '" . addslashes($ownerEmail) . "'\n";
         $configContent .= "];\n";
+          $tempFilePath = __DIR__ . '/writable/temp_owner_email.php';
         
-        file_put_contents(__DIR__ . '/writable/temp_owner_email.php', $configContent);
-        echo "Owner email saved for the seeder.\n";    }
+        // Pastikan direktori writable ada dan dapat ditulis
+        if (!is_dir(dirname($tempFilePath))) {
+            mkdir(dirname($tempFilePath), 0777, true);
+        }
+        
+        // Coba tulis file
+        if (file_put_contents($tempFilePath, $configContent)) {
+            echo "Owner email saved for the seeder.\n";
+        } else {
+            echo "PERINGATAN: Tidak dapat menyimpan email owner ke file sementara.\n";
+            echo "Pastikan folder 'writable' dapat ditulis.\n";
+            
+            // Simpan ke file alternatif jika writable tidak dapat diakses
+            $altTempPath = __DIR__ . '/temp_owner_email.php';
+            if (file_put_contents($altTempPath, $configContent)) {
+                echo "Email owner disimpan di lokasi alternatif.\n";
+            }
+        }
+    }
     
     echo "Database setup complete. Default users will be created by the seeder.\n";
 }

@@ -34,6 +34,12 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
+echo Menyiapkan folder writable...
+mkdir writable\cache writable\logs writable\session writable\uploads 2>NUL
+echo Mengatur izin folder...
+attrib +r +a writable /s /d
+
+echo.
 echo LANGKAH 1: Menginstal Library...
 echo.
 php setup_libraries.php
@@ -80,16 +86,26 @@ if %SKIP_DB%==1 (
         pause
         exit /b 1
     )
-    
-    echo.
+      echo.
     echo Menjalankan seeder...
     php spark db:seed InitialDataSeeder
     
     if %ERRORLEVEL% NEQ 0 (
         echo.
-        echo Database seeder gagal. Silakan periksa pesan error di atas.
-        pause
-        exit /b 1
+        echo Seeder gagal. Mencoba dengan helper script...
+        php setup_seeder_helper.php
+        
+        echo Menjalankan seeder kembali...
+        php spark db:seed InitialDataSeeder
+        
+        if %ERRORLEVEL% NEQ 0 (
+            echo.
+            echo Database seeder masih gagal.
+            echo Silakan jalankan 'php setup_seeder_helper.php' dan kemudian 'php spark db:seed KaryawanSeeder' secara manual.
+            pause
+        ) else (
+            echo Seeder berhasil dijalankan dengan bantuan helper.
+        )
     )
       echo.
     echo ========================================
