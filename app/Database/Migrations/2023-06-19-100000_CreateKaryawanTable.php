@@ -26,7 +26,7 @@ class CreateKaryawanTable extends Migration
                 'constraint' => 255,
             ],            'role' => [
                 'type'       => 'ENUM',
-                'constraint' => ['admin', 'kasir', 'owner', 'pemilik'],
+                'constraint' => ['admin', 'kasir', 'pemilik','kepala_toko'],
                 'default'    => 'kasir',
             ],
             'is_deleted' => [

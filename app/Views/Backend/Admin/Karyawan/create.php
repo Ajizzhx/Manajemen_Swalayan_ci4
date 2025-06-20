@@ -45,8 +45,7 @@
                     <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" class="form-control" id="email" name="email" value="<?= old('email') ?>" required>
-                    </div>
-                    <div class="form-group">
+                    </div>                    <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-group">
                             <input type="password" class="form-control" id="password" name="password" required>
@@ -55,7 +54,10 @@
                             </span>
                         </div>
                         <small class="form-text text-muted">Minimal 6 karakter.</small>
-                    </div>                    <div class="form-group">
+                        <?php if ($validation->hasError('password')): ?>
+                            <div class="text-danger" style="font-size: 12px;"><?= $validation->getError('password') ?></div>
+                        <?php endif; ?>
+                    </div><div class="form-group">
                         <label for="role">Role</label>
                         <select class="form-control" id="role" name="role" required>
                             <option value="">Pilih Role</option>
@@ -88,5 +90,30 @@ function togglePasswordVisibility(inputId, toggleIconElement) {
         }
     }
 }
+
+// Validasi password secara real-time
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('password');
+    const minLength = 6;
+    
+    passwordInput.addEventListener('input', function() {
+        const value = this.value;
+        const feedbackElement = this.parentNode.nextElementSibling.nextElementSibling || 
+                               document.createElement('div');
+        
+        if (!feedbackElement.classList.contains('password-validation-feedback')) {
+            feedbackElement.className = 'password-validation-feedback';
+            this.parentNode.parentNode.appendChild(feedbackElement);
+        }
+        
+        if (value.length > 0 && value.length < minLength) {
+            feedbackElement.innerHTML = '<div class="text-danger" style="font-size: 12px;">Password terlalu pendek! Minimal ' + minLength + ' karakter.</div>';
+        } else if (value.length >= minLength) {
+            feedbackElement.innerHTML = '<div class="text-success" style="font-size: 12px;">Panjang password sudah memenuhi syarat.</div>';
+        } else {
+            feedbackElement.innerHTML = '';
+        }
+    });
+});
 </script>
 <?= $this->include('Backend/Template/footer') ?>

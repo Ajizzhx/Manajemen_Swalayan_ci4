@@ -54,9 +54,28 @@ class KaryawanController extends BaseController
                     'required'    => 'Nama karyawan wajib diisi.'
                 ]
             ],
-            'email' => 'required|valid_email|is_unique[karyawan.email]',
-            'password' => 'required|min_length[6]',
-            'role' => 'required|in_list[admin,kasir,kepala_toko]'
+            'email' => [
+                'rules' => 'required|valid_email|is_unique[karyawan.email]',
+                'errors' => [
+                    'required' => 'Email wajib diisi.',
+                    'valid_email' => 'Format email tidak valid.',
+                    'is_unique' => 'Email ini sudah digunakan.'
+                ]
+            ],
+            'password' => [
+                'rules' => 'required|min_length[6]',
+                'errors' => [
+                    'required' => 'Password wajib diisi.',
+                    'min_length' => 'Password minimal harus terdiri dari {param} karakter.'
+                ]
+            ],
+            'role' => [
+                'rules' => 'required|in_list[admin,kasir,kepala_toko]',
+                'errors' => [
+                    'required' => 'Role wajib dipilih.',
+                    'in_list' => 'Role yang dipilih tidak valid.'
+                ]
+            ]
         ];
 
         if (!$this->validate($rules)) {
@@ -128,11 +147,14 @@ class KaryawanController extends BaseController
             ],
             'email' => $emailRule,
             'role' => 'required|in_list[admin,kasir,kepala_toko]'
-        ];
-
-        // Password hanya diupdate jika diisi
+        ];        // Password hanya diupdate jika diisi
         if ($this->request->getPost('password')) {
-            $rules['password'] = 'min_length[6]';
+            $rules['password'] = [
+                'rules' => 'min_length[6]',
+                'errors' => [
+                    'min_length' => 'Password minimal harus terdiri dari {param} karakter.'
+                ]
+            ];
         }
 
         if (!$this->validate($rules)) {

@@ -24,11 +24,6 @@
                     <p class="text-center">
                         <span class="glyphicon glyphicon-envelope"></span> Email: <strong><?= esc(session()->get('2fa_karyawan_data')['email'] ?? 'email Anda') ?></strong>
                     </p>
-                    <?php if (session()->get('2fa_karyawan_data')['email'] === 'owner@swalayan.com'): ?>
-                    <div class="alert alert-warning">
-                        <strong>Perhatian!</strong> Anda masih menggunakan email default. Setelah login, segera perbarui email Anda di menu "Profil & Email OTP" agar dapat menerima kode OTP dengan benar.
-                    </div>
-                    <?php endif; ?>
                     <hr/>
                         <?php if (session()->getFlashdata('message')): ?>
                             <div class="alert alert-info alert-dismissable">

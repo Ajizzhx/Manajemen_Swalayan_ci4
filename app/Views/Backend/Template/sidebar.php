@@ -15,10 +15,9 @@
 						<span class="glyphicon glyphicon-cog"></span> Kelola Data Master <span class="icon pull-right"><em class="glyphicon glyphicon-s glyphicon-plus"></em></span>
 					</a>
 					<ul class="children collapse <?= (strpos(uri_string(), 'admin/produk') !== false || strpos(uri_string(), 'admin/kategori') !== false || strpos(uri_string(), 'admin/supplier') !== false || strpos(uri_string(), 'admin/pelanggan') !== false) ? 'in' : '' ?>" id="sub-item-master">
-						
+						<li class="<?= (strpos(uri_string(), 'admin/produk') !== false) ? 'active' : '' ?>"><a class="" href="<?= site_url('admin/produk') ?>"><span class="glyphicon glyphicon-shopping-cart"></span> Produk</a></li>
 						<li class="<?= (strpos(uri_string(), 'admin/kategori') !== false) ? 'active' : '' ?>"><a class="" href="<?= site_url('admin/kategori') ?>"><span class="glyphicon glyphicon-list"></span> Kategori</a></li>
 						<li class="<?= (strpos(uri_string(), 'admin/supplier') !== false) ? 'active' : '' ?>"><a class="" href="<?= site_url('admin/supplier') ?>"><span class="glyphicon glyphicon-briefcase"></span> Supplier</a></li>
-						<li class="<?= (strpos(uri_string(), 'admin/produk') !== false) ? 'active' : '' ?>"><a class="" href="<?= site_url('admin/produk') ?>"><span class="glyphicon glyphicon-shopping-cart"></span> Produk</a></li>
 						<li class="<?= (strpos(uri_string(), 'admin/pelanggan') !== false) ? 'active' : '' ?>"><a class="" href="<?= site_url('admin/pelanggan') ?>"><span class="glyphicon glyphicon-star-empty"></span> Membership</a></li>
 					</ul>
 				</li>
@@ -78,9 +77,6 @@
 						</li>
 						<li class="<?= (strpos(uri_string(), 'admin/owner-area/audit-log') !== false) ? 'active' : '' ?>">
 							<a href="<?= site_url('admin/owner-area/audit-log') ?>"><span class="glyphicon glyphicon-eye-open"></span> Log Audit</a>
-						</li>
-						<li class="<?= (strpos(uri_string(), 'admin/owner-area/transaksi-approval') !== false) ? 'active' : '' ?>">
-							<a href="<?= site_url('admin/owner-area/transaksi-approval') ?>"><span class="glyphicon glyphicon-check"></span> Persetujuan Hapus</a>
 						</li>
 						<li class="<?= (strpos(uri_string(), 'admin/owner-area/karyawan') !== false) ? 'active' : '' ?>">
 							<a href="<?= site_url('admin/owner-area/karyawan') ?>"><span class="glyphicon glyphicon-briefcase"></span> Kelola Karyawan</a>

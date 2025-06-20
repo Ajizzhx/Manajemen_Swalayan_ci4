@@ -102,9 +102,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($lowStockProducts as $product): ?>                                <tr class="<?= ($product['stok'] <= $lowStockThreshold/2) ? 'danger' : 'warning' ?>">
-                                    <td><?= esc($product['kode_barcode']) ?></td>
-                                    <td><?= esc($product['nama']) ?></td>
+                                <?php foreach ($lowStockProducts as $product): ?>
+                                <tr class="<?= ($product['stok'] <= $lowStockThreshold/2) ? 'danger' : 'warning' ?>">
+                                    <td><?= esc($product['kode_produk']) ?></td>
+                                    <td><?= esc($product['nama_produk']) ?></td>
                                     <td><?= esc($product['nama_kategori']) ?></td>
                                     <td><?= esc($product['stok']) ?></td>
                                     <td>
@@ -144,9 +145,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($products as $product): ?>                                <tr class="<?= ($product['stok'] <= $lowStockThreshold) ? 'danger' : '' ?>">
-                                    <td><?= esc($product['kode_barcode']) ?></td>
-                                    <td><?= esc($product['nama']) ?></td>
+                                <?php foreach ($products as $product): ?>
+                                <tr class="<?= ($product['stok'] <= $lowStockThreshold) ? 'danger' : '' ?>">
+                                    <td><?= esc($product['kode_produk']) ?></td>
+                                    <td><?= esc($product['nama_produk']) ?></td>
                                     <td><?= esc($product['nama_kategori']) ?></td>
                                     <td><?= esc($product['stok']) ?></td>
                                     <td>

@@ -23,10 +23,6 @@ $routes->group('admin', ['filter' => 'roleGuard:admin,pemilik,kepala_toko', 'nam
     $routes->get('/', 'DashboardController::index', ['as' => 'admin.dashboard.index']); // Mengarahkan /admin ke dashboard
     $routes->get('dashboard', 'DashboardController::index', ['as' => 'admin.dashboard']);
 
-    // Owner Profile Routes (for email OTP management)
-    $routes->get('owner-profile', 'OwnerProfile::index', ['as' => 'admin.owner.profile', 'filter' => 'roleGuard:pemilik']);
-    $routes->post('owner-profile/update', 'OwnerProfile::update', ['as' => 'admin.owner.profile.update', 'filter' => 'roleGuard:pemilik']);
-
     // Rute Monitoring (Khusus Kepala Toko)
     $routes->group('monitoring', function ($routes) {
         $routes->get('stok', 'MonitoringController::stok', ['as' => 'admin.monitoring.stok', 'filter' => 'roleGuard:kepala_toko,admin']);

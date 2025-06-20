@@ -44,8 +44,7 @@
                     <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" class="form-control" id="email" name="email" value="<?= old('email', $karyawan['email']) ?>" required>
-                    </div>
-                    <div class="form-group">
+                    </div>                    <div class="form-group">
                         <label for="password">Password (Opsional)</label>
                         <div class="input-group">
                             <input type="password" class="form-control" id="password" name="password">
@@ -54,12 +53,15 @@
                             </span>
                         </div>
                         <small class="form-text text-muted">Kosongkan jika tidak ingin mengubah password. Minimal 6 karakter jika diisi.</small>
+                        <?php if ($validation->hasError('password')): ?>
+                            <div class="text-danger" style="font-size: 12px;"><?= $validation->getError('password') ?></div>
+                        <?php endif; ?>
                     </div>
-                    <div class="form-group">
-                        <label for="role">Role</label>
+                    <div class="form-group">                        <label for="role">Role</label>
                         <select class="form-control" id="role" name="role" required>
                             <option value="">Pilih Role</option>
                             <option value="admin" <?= old('role', $karyawan['role']) == 'admin' ? 'selected' : '' ?>>Admin</option>
+                            <option value="kepala_toko" <?= old('role', $karyawan['role']) == 'kepala_toko' ? 'selected' : '' ?>>Kepala Toko</option>
                             <option value="kasir" <?= old('role', $karyawan['role']) == 'kasir' ? 'selected' : '' ?>>Kasir</option>
                         </select>
                     </div>
@@ -87,5 +89,33 @@ function togglePasswordVisibility(inputId, toggleIconElement) {
         }
     }
 }
+
+// Validasi password secara real-time
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('password');
+    const minLength = 6;
+    
+    passwordInput.addEventListener('input', function() {
+        const value = this.value;
+        const feedbackElement = this.parentNode.nextElementSibling.nextElementSibling || 
+                               document.createElement('div');
+        
+        if (!feedbackElement.classList.contains('password-validation-feedback')) {
+            feedbackElement.className = 'password-validation-feedback';
+            this.parentNode.parentNode.appendChild(feedbackElement);
+        }
+        
+        // Only validate if there's a value (since password is optional on edit)
+        if (value.length > 0) {
+            if (value.length < minLength) {
+                feedbackElement.innerHTML = '<div class="text-danger" style="font-size: 12px;">Password terlalu pendek! Minimal ' + minLength + ' karakter.</div>';
+            } else {
+                feedbackElement.innerHTML = '<div class="text-success" style="font-size: 12px;">Panjang password sudah memenuhi syarat.</div>';
+            }
+        } else {
+            feedbackElement.innerHTML = '';
+        }
+    });
+});
 </script>
 <?= $this->include('Backend/Template/footer') ?>

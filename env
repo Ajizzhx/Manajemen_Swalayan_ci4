@@ -67,6 +67,3 @@ database.default.port = 3306
 #--------------------------------------------------------------------
 
 # logger.threshold = 4
-
-# PREVENT_MIGRATIONS=true # Flag untuk mencegah duplikasi migrasi
-# PENTING: Jangan jalankan 'php spark migrate' karena tabel sudah dibuat secara manual

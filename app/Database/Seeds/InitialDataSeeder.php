@@ -8,6 +8,9 @@ class InitialDataSeeder extends Seeder
 {
     public function run()
     {
+        // Temporarily disable foreign key checks to avoid constraint issues
+        $this->db->query("SET FOREIGN_KEY_CHECKS=0");
+        
         $this->call('KaryawanSeeder');
         
         // Add example kategori
@@ -33,7 +36,9 @@ class InitialDataSeeder extends Seeder
         foreach ($suppliers as $supplier) {
             $this->db->table('supplier')->insert($supplier);
         }
+          echo "Initial data seeder successfully executed.\n";
         
-        echo "Initial data seeder successfully executed.\n";
+        // Re-enable foreign key checks
+        $this->db->query("SET FOREIGN_KEY_CHECKS=1");
     }
 }
