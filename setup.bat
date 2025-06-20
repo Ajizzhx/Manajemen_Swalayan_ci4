@@ -85,9 +85,15 @@ if %SKIP_DB%==1 (
         echo Migrasi database gagal. Silakan periksa pesan error di atas.
         pause
         exit /b 1
-    )
-      echo.
+    )    echo.
     echo Menjalankan seeder...
+    
+    rem Coba jalankan KaryawanSeeder terlebih dahulu untuk menambahkan pengguna
+    echo Menjalankan KaryawanSeeder...
+    php spark db:seed KaryawanSeeder
+    
+    rem Kemudian jalankan InitialDataSeeder untuk data lainnya
+    echo Menjalankan InitialDataSeeder...
     php spark db:seed InitialDataSeeder
     
     if %ERRORLEVEL% NEQ 0 (
@@ -95,13 +101,19 @@ if %SKIP_DB%==1 (
         echo Seeder gagal. Mencoba dengan helper script...
         php setup_seeder_helper.php
         
-        echo Menjalankan seeder kembali...
+        echo Menjalankan seeder kembali secara terpisah...
+        echo Menjalankan KaryawanSeeder...
+        php spark db:seed KaryawanSeeder
+        
+        echo Menjalankan InitialDataSeeder...
         php spark db:seed InitialDataSeeder
         
         if %ERRORLEVEL% NEQ 0 (
             echo.
             echo Database seeder masih gagal.
-            echo Silakan jalankan 'php setup_seeder_helper.php' dan kemudian 'php spark db:seed KaryawanSeeder' secara manual.
+            echo Silakan jalankan 'php setup_seeder_helper.php' dan kemudian jalankan seeder secara manual:
+            echo 1. php spark db:seed KaryawanSeeder
+            echo 2. php spark db:seed InitialDataSeeder
             pause
         ) else (
             echo Seeder berhasil dijalankan dengan bantuan helper.

@@ -77,6 +77,36 @@ else
     fi
     
     echo
+    echo "Menjalankan migrasi database..."
+    php spark migrate
+    
+    if [ $? -ne 0 ]; then
+        echo
+        echo "Migrasi database gagal. Silakan periksa pesan error di atas."
+        exit 1
+    fi
+    
+    echo "Menjalankan seeder..."
+    echo "Menjalankan KaryawanSeeder..."
+    php spark db:seed KaryawanSeeder
+    
+    echo "Menjalankan InitialDataSeeder..."
+    php spark db:seed InitialDataSeeder
+    
+    if [ $? -ne 0 ]; then
+        echo
+        echo "Seeder gagal. Mencoba dengan helper script..."
+        php setup_seeder_helper.php
+        
+        echo "Menjalankan seeder kembali secara terpisah..."
+        echo "Menjalankan KaryawanSeeder..."
+        php spark db:seed KaryawanSeeder
+        
+        echo "Menjalankan InitialDataSeeder..."
+        php spark db:seed InitialDataSeeder
+    fi
+    
+    echo
     echo "========================================"
     echo "  Setup Database Berhasil!"
     echo "========================================"

@@ -11,6 +11,10 @@ echo
 php spark migrate
 
 # Run the seeds
+echo "Menjalankan KaryawanSeeder..."
+php spark db:seed KaryawanSeeder
+
+echo "Menjalankan InitialDataSeeder..."
 php spark db:seed InitialDataSeeder
 
 echo

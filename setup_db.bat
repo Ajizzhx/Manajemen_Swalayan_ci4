@@ -25,6 +25,10 @@ php spark migrate
 
 rem Run the seeds
 echo Menjalankan seeder...
+echo Menjalankan KaryawanSeeder...
+php spark db:seed KaryawanSeeder
+
+echo Menjalankan InitialDataSeeder...
 php spark db:seed InitialDataSeeder
 
 echo.
