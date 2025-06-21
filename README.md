@@ -17,9 +17,24 @@ Aplikasi Swalayan CI4 adalah sistem manajemen toko swalayan berbasis web yang di
 - Composer
 
 > [!PENTING]
-> Aplikasi ini menggunakan sistem OTP untuk login sebagai owner. Anda memerlukan email yang valid dan pengaturan SMTP yang benar untuk menerima kode OTP.
+
+### Instalasi Composer
+
+Aplikasi ini membutuhkan Composer untuk pengelolaan dependensi. Jika belum menginstal Composer, ikuti langkah-langkah berikut:
+
+1. Download installer Composer dari [getcomposer.org](https://getcomposer.org/download/)
+2. Untuk Windows, unduh dan jalankan Composer-Setup.exe
+3. Untuk Linux/Mac, ikuti petunjuk instalasi CLI di situs Composer
+
+Setelah instalasi, verifikasi dengan menjalankan:
+
+```
+composer --version
+```
 
 ## Panduan Instalasi
+
+> Aplikasi ini menggunakan sistem OTP untuk login sebagai owner. Anda memerlukan email yang valid dan pengaturan SMTP yang benar untuk menerima kode OTP.
 
 ### Instalasi Otomatis (Rekomendasi untuk Windows)
 
@@ -204,3 +219,45 @@ Kasir memiliki akses terbatas untuk melayani pelanggan di kasir.
 ## Dukungan
 
 Jika mengalami masalah atau pertanyaan, silakan buat issue di repository GitHub ini.
+
+## Penjelasan File Instalasi
+
+Proses instalasi pada aplikasi ini menggunakan beberapa file otomatisasi untuk memudahkan setup. Berikut penjelasan masing-masing file:
+
+### install.php
+
+File ini bertugas sebagai script utama untuk persiapan aplikasi dengan fungsi:
+
+- Memeriksa versi PHP dan ekstensi yang diperlukan
+- Memverifikasi keberadaan dan versi Composer
+- Menginstal dependensi PHP menggunakan Composer
+- Membuat file `.env` dengan menyalin dari `env`
+- Mengkonfigurasi URL dasar aplikasi
+- Mempersiapkan konfigurasi email
+
+### setup-database.php
+
+File ini bertanggung jawab untuk konfigurasi database dengan fungsi:
+
+- Memeriksa keberadaan file `.env`
+- Mengonfirmasi/mengubah konfigurasi database (host, nama, user, password)
+- Memperbarui file `.env` dengan konfigurasi database yang baru
+- Mengonfigurasi email SMTP untuk verifikasi OTP
+- Membuat database jika belum ada
+- Menjalankan migrasi untuk membuat struktur tabel
+- Mengisi data awal dengan seeder
+- Membuat akun owner dengan email yang ditentukan
+
+### install.bat
+
+Batch file untuk Windows yang menjalankan seluruh proses instalasi secara otomatis:
+
+- Memeriksa ketersediaan PHP
+- Menjalankan `install.php` untuk konfigurasi aplikasi
+- Menjalankan `check-env.php` untuk validasi file `.env`
+- Menjalankan `setup-database.php` untuk konfigurasi database
+- Menampilkan informasi akses setelah instalasi selesai
+
+### check-env.php
+
+File tambahan untuk memverifikasi format dan sintaks file `.env` sebelum melanjutkan proses instalasi.
