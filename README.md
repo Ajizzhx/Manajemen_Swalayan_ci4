@@ -12,11 +12,51 @@ Aplikasi Swalayan CI4 adalah sistem manajemen toko swalayan berbasis web yang di
   - [mbstring](http://php.net/manual/en/mbstring.installation.php)
   - json (diaktifkan secara default)
   - [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) untuk MySQL
+  - [mysqli](https://www.php.net/manual/en/mysqli.installation.php) untuk koneksi MySQL
+  - [pdo_mysql](https://www.php.net/manual/en/ref.pdo-mysql.php) untuk PDO MySQL
   - [libcurl](http://php.net/manual/en/curl.requirements.php) untuk HTTP\CURLRequest
+  - [fileinfo](https://www.php.net/manual/en/fileinfo.installation.php) untuk menangani file Excel/CSV
 - MySQL atau MariaDB
 - Composer
 
 > [!PENTING]
+
+### Instalasi dan Persiapan XAMPP
+
+XAMPP adalah solusi paket server web yang menyediakan Apache, MySQL, PHP, dan Perl. Untuk menginstal dan menyiapkan XAMPP:
+
+1. **Install XAMPP**
+
+   - Download XAMPP dari [situs resmi Apache Friends](https://www.apachefriends.org/download.html)
+   - Pilih versi dengan PHP 8.1 atau lebih tinggi
+   - Jalankan installer dan ikuti petunjuk instalasi
+
+2. **Menjalankan XAMPP**
+
+   - Buka XAMPP Control Panel
+   - Aktifkan modul Apache dan MySQL dengan mengklik tombol "Start"
+   - Pastikan kedua modul berjalan (status warna hijau)
+
+3. **Mengaktifkan Ekstensi PHP**
+
+   - Di XAMPP Control Panel, klik "Config" pada baris Apache, lalu pilih "PHP (php.ini)"
+   - Pastikan ekstensi berikut tidak dikomentari (hapus tanda `;` di awal baris jika ada):
+     ```
+     extension=intl
+     extension=mbstring
+     extension=mysqli
+     extension=pdo_mysql
+     extension=curl
+     extension=fileinfo
+     ```
+   - Simpan file dan restart Apache di XAMPP Control Panel
+
+4. **Persiapan Database**
+   - Buka phpMyAdmin melalui http://localhost/phpmyadmin
+   - Klik "Database" di menu atas
+   - Buat database baru dengan nama `swalayan_db`
+   - Pilih collation `utf8mb4_unicode_ci`
+   - Klik "Create"
 
 ### Instalasi Composer
 
@@ -56,42 +96,90 @@ composer --version
    > [!NOTE]
    > Instalasi otomatis sudah termasuk mengubah file `env` menjadi `.env`, menginstal semua dependensi, dan mengatur database.
 
-### Instalasi Manual
 
-1. Clone repository ini ke komputer Anda:
 
-   ```
-   git clone https://github.com/Ajizzhx/swalayan_ci4.git
-   cd swalayan_ci4
-   ```
+### Instalasi Manual (Cara Alternatif)
 
-2. Ubah nama file `env` menjadi `.env`:
+Jika terjadi masalah pada instalasi Otomatis, silahkan gunakan cara alternatif ini, berikut instruksinya:
 
-   ```
-   # Di Windows
-   rename env .env
+#### 1. Download/Clone Project
 
-   # Di Linux/Mac
-   mv env .env
-   ```
+```
+git clone https://github.com/Ajizzhx/swalayan_ci4.git
+```
 
-3. Jalankan skrip instalasi PHP:
+Tempatkan folder project ini di htdocs XAMPP (misal: `C:/xampp/htdocs/swalayan_ci4`)
 
-   ```
-   php install.php
-   ```
+> [!IMPORTANT]
+> Pastikan XAMPP sudah terinstal dan server Apache serta MySQL sudah aktif sebelum melanjutkan langkah berikutnya.
 
-4. Jalankan skrip pembuatan database:
+#### 2. Install Dependency melalui Composer
 
-   ```
-   php setup-database.php
-   ```
+```
+cd swalayan_ci4
+composer install
+```
 
-5. Ikuti petunjuk yang muncul untuk mengkonfigurasi aplikasi dan database.
+#### 3. Copy & Edit File Environment
+
+```
+cp env .env
+```
+
+Kemudian edit file `.env` untuk mengatur konfigurasi database dan aplikasi:
+
+- Ubah `CI_ENVIRONMENT` sesuai kebutuhan (development/production)
+- Sesuaikan `app.baseURL`
+- Konfigurasi database
+
+#### 4. Konfigurasi Database
+
+- Buat database baru di phpMyAdmin/MySQL, misal: `swalayan_db`
+- Edit bagian database di file `.env`:
+  ```
+  database.default.hostname = localhost
+  database.default.database = swalayan_db
+  database.default.username = root
+  database.default.password =
+  database.default.DBDriver = MySQLi
+  ```
+
+#### 5. Migrasi & Seeder Database
+
+Jalankan perintah berikut di terminal/cmd dari folder project:
+
+```
+php spark migrate
+php spark db:seed InitialDataSeeder
+```
+
+#### 6. Konfigurasi Email untuk OTP (Wajib untuk Login Owner)
+
+Edit bagian email di file `.env` atau di `app/Config/Email.php`:
+
+```
+email.fromEmail = 'noreply@swalayanci4.com'
+email.fromName = 'Swalayan CI4'
+email.SMTPHost = 'smtp.gmail.com'
+email.SMTPUser = 'your-email@gmail.com'
+email.SMTPPass = 'your-app-password'
+email.SMTPPort = 465
+email.SMTPCrypto = 'ssl'
+```
+
+#### 7. Menjalankan Website
+
+```
+php spark serve
+```
+
+Buka http://localhost:8080 di browser
 
 ## Penggunaan
 
 ## Memulai Aplikasi
+
+### Menggunakan PHP Built-in Server
 
 1. Setelah instalasi selesai, jalankan server development:
 
@@ -120,16 +208,7 @@ composer --version
 - Manajemen pengguna dengan peran berbeda (owner, admin, kasir)
 - Audit log untuk keamanan
 
-## Konfigurasi Server Production
 
-Untuk deployment ke server production, pastikan:
-
-1. Server web (Apache/Nginx) dikonfigurasi untuk mengarah ke folder `public/`
-2. Pastikan folder `writable/` bisa ditulis oleh server web
-3. Sesuaikan file `.env` dengan konfigurasi production yang benar:
-   - Ubah `CI_ENVIRONMENT` menjadi `production`
-   - Sesuaikan `app.baseURL` dengan domain Anda
-   - Konfigurasi database dan email dengan benar
 
 ## Informasi Penting
 
@@ -258,6 +337,5 @@ Batch file untuk Windows yang menjalankan seluruh proses instalasi secara otomat
 - Menjalankan `setup-database.php` untuk konfigurasi database
 - Menampilkan informasi akses setelah instalasi selesai
 
-### check-env.php
+> Panduan ini hanya untuk instalasi dan setup awal. Untuk pengembangan lebih lanjut, silakan sesuaikan sesuai kebutuhan Anda.
 
-File tambahan untuk memverifikasi format dan sintaks file `.env` sebelum melanjutkan proses instalasi.
